@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
+const logger = require('../logger');  // ✅ fixed!
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -30,6 +31,7 @@ const sendMoney = async (req, res) => {
 
     // 4. Check user has enough balance
     if (user.balance < amountSent) {
+      logger.warn('Transfer failed - insufficient balance', { userId, amountSent });  // ← ADDED
       return res.status(400).json({ message: 'Insufficient balance!' });
     }
 
@@ -53,6 +55,14 @@ const sendMoney = async (req, res) => {
       }
     });
 
+    logger.info('Transfer successful', {  // ← ADDED
+      userId,
+      amountSent,
+      currency,
+      country,
+      transactionId: transaction.id
+    });
+
     // 7. Return success
     res.status(201).json({
       message: 'Transfer successful!',
@@ -60,7 +70,7 @@ const sendMoney = async (req, res) => {
     });
 
   } catch (error) {
-    console.log('Transfer error:', error);
+    logger.error('Transfer error', { error: error.message });  // ← ADDED
     res.status(500).json({ message: 'Something went wrong!' });
   }
 };
@@ -70,16 +80,17 @@ const getHistory = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    // Get all transactions for this user
     const transactions = await prisma.transaction.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' }
     });
 
+    logger.info('History fetched', { userId, count: transactions.length });  // ← ADDED
+
     res.status(200).json({ transactions });
 
   } catch (error) {
-    console.log('History error:', error);
+    logger.error('History error', { error: error.message });  // ← ADDED
     res.status(500).json({ message: 'Something went wrong!' });
   }
 };
@@ -94,10 +105,12 @@ const getBalance = async (req, res) => {
       select: { balance: true, name: true, email: true }
     });
 
+    logger.info('Balance fetched', { userId });  // ← ADDED
+
     res.status(200).json({ user });
 
   } catch (error) {
-    console.log('Balance error:', error);
+    logger.error('Balance error', { error: error.message });  // ← ADDED
     res.status(500).json({ message: 'Something went wrong!' });
   }
 };

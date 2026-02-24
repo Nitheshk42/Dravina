@@ -1,67 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const dummyTransactions = [
-  {
-    id: 1,
-    country: 'India',
-    flag: '🇮🇳',
-    currency: 'INR',
-    amountSent: 500.00,
-    amountReceived: '41,234.50',
-    date: 'Feb 19, 2026',
-    time: '10:32 AM',
-    status: 'Completed',
-    exchangeRate: '83.1200',
-  },
-  {
-    id: 2,
-    country: 'United Kingdom',
-    flag: '🇬🇧',
-    currency: 'GBP',
-    amountSent: 200.00,
-    amountReceived: '156.82',
-    date: 'Feb 18, 2026',
-    time: '03:15 PM',
-    status: 'Completed',
-    exchangeRate: '0.7841',
-  },
-  {
-    id: 3,
-    country: 'UAE',
-    flag: '🇦🇪',
-    currency: 'AED',
-    amountSent: 150.00,
-    amountReceived: '547.23',
-    date: 'Feb 17, 2026',
-    time: '11:45 AM',
-    status: 'Pending',
-    exchangeRate: '3.6725',
-  },
-  {
-    id: 4,
-    country: 'Europe',
-    flag: '🇪🇺',
-    currency: 'EUR',
-    amountSent: 300.00,
-    amountReceived: '274.12',
-    date: 'Feb 15, 2026',
-    time: '09:20 AM',
-    status: 'Failed',
-    exchangeRate: '0.9204',
-  },
-  {
-    id: 5,
-    country: 'Singapore',
-    flag: '🇸🇬',
-    currency: 'SGD',
-    amountSent: 1000.00,
-    amountReceived: '1,342.10',
-    date: 'Feb 10, 2026',
-    time: '02:00 PM',
-    status: 'Completed',
-    exchangeRate: '1.3421',
-  },
-];
+import { getHistory } from '../services/api';
 
 const statusConfig = {
   Completed: { color: '#1a7a6e', bg: '#f0fff8', icon: '✅' },
@@ -71,10 +10,43 @@ const statusConfig = {
 
 function History() {
   const navigate = useNavigate();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalSent = dummyTransactions
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await getHistory();
+        setTransactions(response.data.transactions);
+        setLoading(false);
+      } catch (error) {
+        console.log('Error fetching history:', error);
+        if (error.response?.status === 401) {
+          navigate('/');
+        }
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [navigate]);
+
+  const totalSent = transactions
     .filter(t => t.status === 'Completed')
     .reduce((sum, t) => sum + t.amountSent, 0);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
 
   return (
     <div style={{ background: '#f7f8fc', minHeight: '100vh' }}>
@@ -122,7 +94,7 @@ function History() {
             textAlign: 'center'
           }}>
             <p style={{ fontSize: '11px', color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Transfers</p>
-            <p style={{ fontSize: '22px', fontWeight: '800', color: '#0f4c81', margin: '6px 0 0' }}>{dummyTransactions.length}</p>
+            <p style={{ fontSize: '22px', fontWeight: '800', color: '#0f4c81', margin: '6px 0 0' }}>{transactions.length}</p>
           </div>
 
           <div style={{
@@ -132,16 +104,36 @@ function History() {
           }}>
             <p style={{ fontSize: '11px', color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Completed</p>
             <p style={{ fontSize: '22px', fontWeight: '800', color: '#1a7a6e', margin: '6px 0 0' }}>
-              {dummyTransactions.filter(t => t.status === 'Completed').length}
+              {transactions.filter(t => t.status === 'Completed').length}
             </p>
           </div>
 
         </div>
 
+        {/* Loading */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <p style={{ color: '#aaa', fontSize: '14px' }}>Loading transactions...</p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && transactions.length === 0 && (
+          <div style={{
+            background: 'white', borderRadius: '24px',
+            padding: '60px 32px', textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
+          }}>
+            <p style={{ fontSize: '48px', marginBottom: '16px' }}>💸</p>
+            <p style={{ fontWeight: '700', fontSize: '18px', color: '#1a1a2e' }}>No transactions yet!</p>
+            <p style={{ color: '#888', fontSize: '14px', marginTop: '8px' }}>Send your first transfer to get started</p>
+          </div>
+        )}
+
         {/* Transaction List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {dummyTransactions.map((transaction) => {
-            const status = statusConfig[transaction.status];
+          {transactions.map((transaction) => {
+            const status = statusConfig[transaction.status] || statusConfig.Completed;
             return (
               <div
                 key={transaction.id}
@@ -150,27 +142,26 @@ function History() {
                   padding: '22px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   transition: 'transform 0.2s',
-                  cursor: 'default'
                 }}
                 onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                 onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
               >
-                {/* Left — Flag + Details */}
+                {/* Left — Country + Details */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{
                     background: '#f7f8fc', borderRadius: '16px',
                     width: '52px', height: '52px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '28px'
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', fontSize: '28px'
                   }}>
-                    {transaction.flag}
+                    🌍
                   </div>
                   <div>
                     <p style={{ fontWeight: '700', fontSize: '15px', color: '#1a1a2e', margin: '0 0 3px' }}>
                       {transaction.country}
                     </p>
                     <p style={{ fontSize: '12px', color: '#aaa', margin: '0 0 6px' }}>
-                      {transaction.date} · {transaction.time}
+                      {formatDate(transaction.createdAt)} · {formatTime(transaction.createdAt)}
                     </p>
                     <div style={{
                       display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -191,7 +182,7 @@ function History() {
                     -${transaction.amountSent.toFixed(2)}
                   </p>
                   <p style={{ fontSize: '13px', color: '#1a7a6e', fontWeight: '600', margin: '0 0 3px' }}>
-                    +{transaction.amountReceived} {transaction.currency}
+                    +{transaction.amountReceived.toFixed(2)} {transaction.currency}
                   </p>
                   <p style={{ fontSize: '11px', color: '#aaa', margin: 0 }}>
                     Rate: {transaction.exchangeRate}
@@ -204,19 +195,21 @@ function History() {
         </div>
 
         {/* Bottom Send Button */}
-        <button
-          onClick={() => navigate('/send')}
-          style={{
-            width: '100%', marginTop: '24px', marginBottom: '32px',
-            padding: '18px',
-            background: 'linear-gradient(135deg, #0f4c81, #1a7a6e)',
-            color: 'white', border: 'none', borderRadius: '16px',
-            fontSize: '16px', fontWeight: '700', cursor: 'pointer',
-            fontFamily: 'Sora, sans-serif'
-          }}
-        >
-          💸 Send Another Transfer
-        </button>
+        {!loading && (
+          <button
+            onClick={() => navigate('/send')}
+            style={{
+              width: '100%', marginTop: '24px', marginBottom: '32px',
+              padding: '18px',
+              background: 'linear-gradient(135deg, #0f4c81, #1a7a6e)',
+              color: 'white', border: 'none', borderRadius: '16px',
+              fontSize: '16px', fontWeight: '700', cursor: 'pointer',
+              fontFamily: 'Sora, sans-serif'
+            }}
+          >
+            💸 Send Another Transfer
+          </button>
+        )}
 
       </div>
     </div>

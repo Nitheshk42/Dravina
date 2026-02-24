@@ -31,12 +31,24 @@ function Confirm() {
       </div>
     );
 }
-   const handleConfirm = () => {
-    // For now we just show success and go to history
-    // Later this will call our backend!
-    alert('Transfer Successful! 🎉');
-    navigate('/history');
-  };
+  const handleConfirm = async () => {
+    try {
+      const { sendMoney } = await import('../services/api');
+
+      await sendMoney({
+        amountSent: data.amount,
+        amountReceived: parseFloat(data.recipientGets),
+        currency: data.country.code,
+        country: data.country.name,
+        exchangeRate: parseFloat(data.exchangeRate),
+      });
+
+      navigate('/history');
+
+    } catch (error) {
+      alert(error.response?.data?.message || 'Something went wrong!');
+    }
+};
   return (
     <div style={{ background: '#f7f8fc', minHeight: '100vh' }}>
 

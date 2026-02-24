@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { getBalance } from '../services/api';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -8,6 +9,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState('');
   const [showProfile, setShowProfile] = useState(false);
+  const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(0);
 
   const fetchRates = async () => {
     try {
@@ -22,11 +25,38 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchRates();
-    const interval = setInterval(fetchRates, 30000);
-    return () => clearInterval(interval);
-  }, []);
+ // Fetch real user balance
+
+
+useEffect(() => {
+  fetchRates();
+  const interval = setInterval(fetchRates, 30000);
+  return () => clearInterval(interval);
+}, []);
+
+// 1. Fetch live rates
+useEffect(() => {
+  fetchRates();
+  const interval = setInterval(fetchRates, 30000);
+  return () => clearInterval(interval);
+}, []);
+
+// 2. Fetch real user balance
+useEffect(() => {
+  const fetchBalance = async () => {
+    try {
+      const response = await getBalance();
+      setUser(response.data.user);
+      setBalance(response.data.user.balance);
+    } catch (error) {
+      console.log('Error fetching balance:', error);
+      if (error.response?.status === 401) {
+        navigate('/');
+      }
+    }
+  };
+  fetchBalance();
+}, [navigate]);
 
   const currencies = [
     { code: 'GBP', name: 'British Pound', flag: '🇬🇧' },
@@ -91,7 +121,9 @@ function Dashboard() {
                 }}>🌍 Crobo</span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px' }}>Welcome back 👋</p>
-              <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', marginTop: '2px' }}>John Doe</h1>
+             <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', marginTop: '2px' }}>
+                {user ? user.name : 'Loading...'}
+            </h1>
             </div>
 
             {/* Right - Profile */}
@@ -130,8 +162,8 @@ function Dashboard() {
                       <FaUserCircle size={36} color="white" />
                     </div>
                     <div>
-                      <p style={{ fontWeight: '700', fontSize: '16px', color: '#1a1a2e' }}>John Doe</p>
-                      <p style={{ fontSize: '13px', color: '#888' }}>johndoe@email.com</p>
+                      <p style={{ fontWeight: '700', fontSize: '16px', color: '#1a1a2e' }}>{user ? user.name : '...'}</p>
+                        <p style={{ fontSize: '13px', color: '#888' }}>{user ? user.email : '...'}</p>
                     </div>
                   </div>
 
@@ -162,7 +194,26 @@ function Dashboard() {
                       <CircleProgress percentage={40} color="#1a7a6e" />
                     </div>
                   </div>
-
+                    {/* Logout Button */}
+              <button
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                  navigate('/');
+                }}
+                style={{
+                  width: '100%', marginTop: '16px',
+                  padding: '12px', border: 'none',
+                  borderRadius: '12px', cursor: 'pointer',
+                  background: '#fff0f0', color: '#e74c3c',
+                  fontWeight: '700', fontSize: '14px',
+                  fontFamily: 'Sora, sans-serif',
+                  transition: 'all 0.2s'
+                }}onMouseOver={e => e.target.style.background = '#ffe0e0'}
+                onMouseOut={e => e.target.style.background = '#fff0f0'}
+              >
+                🚪 Logout
+              </button>
                 </div>
               )}
             </div>
@@ -198,7 +249,9 @@ function Dashboard() {
                 borderRadius: '50%'
               }} />
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: '500' }}>Total Balance</p>
-              <h2 style={{ color: 'white', fontSize: '42px', fontWeight: '800', margin: '8px 0 4px', letterSpacing: '-1px' }}>$0.00</h2>
+              <h2 style={{ color: 'white', fontSize: '42px', fontWeight: '800', margin: '8px 0 4px', letterSpacing: '-1px' }}>
+                ${balance.toFixed(2)}
+                </h2>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>🇺🇸 United States Dollar</p>
               <div style={{
                 marginTop: '24px', background: 'rgba(255,255,255,0.15)',
