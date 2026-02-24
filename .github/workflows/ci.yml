@@ -1,0 +1,65 @@
+name: Crobo CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crobo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # 1. Get the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
+
+      # 4. Setup environment variables
+      - name: Setup env file
+        working-directory: ./backend
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/crobo?schema=public" >> .env
+          echo "JWT_SECRET=crobo_super_secret_key_2024" >> .env
+
+      # 5. Generate Prisma client
+      - name: Generate Prisma client
+        working-directory: ./backend
+        run: npx prisma generate
+
+      # 6. Run database migrations
+      - name: Run migrations
+        working-directory: ./backend
+        run: npx prisma migrate deploy
+
+      # 7. Run tests
+      - name: Run tests
+        working-directory: ./backend
+        run: npm test
