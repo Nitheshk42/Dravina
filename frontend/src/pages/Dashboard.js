@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
-import { getBalance } from '../services/api';
+import { getBalance, getLimits } from '../services/api';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +11,10 @@ function Dashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
+  const [limits, setLimits] = useState({
+  daily: { used: 0, limit: 5000, percentage: 0 },
+  weekly: { used: 0, limit: 20000, percentage: 0 }
+});
 
   const fetchRates = async () => {
     try {
@@ -27,11 +31,23 @@ function Dashboard() {
 
  // Fetch real user balance
 
-
 useEffect(() => {
   fetchRates();
   const interval = setInterval(fetchRates, 30000);
   return () => clearInterval(interval);
+}, []);
+
+// Fetch real limits
+useEffect(() => {
+  const fetchLimits = async () => {
+    try {
+      const response = await getLimits();
+      setLimits(response.data);
+    } catch (error) {
+      console.log('Error fetching limits:', error);
+    }
+  };
+  fetchLimits();
 }, []);
 
 // 1. Fetch live rates
@@ -176,10 +192,10 @@ useEffect(() => {
                     <div className="flex justify-between items-center">
                       <div>
                         <p style={{ fontSize: '12px', color: '#888' }}>Daily Limit</p>
-                        <p style={{ fontWeight: '700', color: '#0f4c81', fontSize: '18px' }}>$2,000</p>
-                        <p style={{ fontSize: '11px', color: '#aaa' }}>of $5,000 used</p>
+                        <p style={{ fontWeight: '700', color: '#0f4c81', fontSize: '18px' }}>${limits.daily.used.toFixed(2)}</p>
+                        <p style={{ fontSize: '11px', color: '#aaa' }}>of ${limits.daily.limit.toLocaleString()} used</p>
                       </div>
-                      <CircleProgress percentage={40} color="#0f4c81" />
+                      <CircleProgress percentage={limits.daily.percentage} color="#0f4c81" />
                     </div>
                   </div>
 
@@ -188,10 +204,10 @@ useEffect(() => {
                     <div className="flex justify-between items-center">
                       <div>
                         <p style={{ fontSize: '12px', color: '#888' }}>Weekly Limit</p>
-                        <p style={{ fontWeight: '700', color: '#1a7a6e', fontSize: '18px' }}>$8,000</p>
-                        <p style={{ fontSize: '11px', color: '#aaa' }}>of $20,000 used</p>
+                        <p style={{ fontWeight: '700', color: '#1a7a6e', fontSize: '18px' }}>${limits.weekly.used.toFixed(2)}</p>
+                        <p style={{ fontSize: '11px', color: '#aaa' }}>of ${limits.weekly.limit.toLocaleString()} used</p>
                       </div>
-                      <CircleProgress percentage={40} color="#1a7a6e" />
+                      <CircleProgress percentage={limits.weekly.percentage} color="#1a7a6e" />
                     </div>
                   </div>
                     {/* Logout Button */}
