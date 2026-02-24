@@ -1,4 +1,4 @@
-const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const winston = require('winston');
@@ -29,15 +29,15 @@ const logger = winston.createLogger({
 const PORT = process.env.PORT || 5001;
 
 // Load SSL certificates
-const options = {
-  cert: fs.readFileSync(path.join(__dirname, '../../../certs/localhost.crt')),
-  key: fs.readFileSync(path.join(__dirname, '../../../certs/localhost.key'))
-};
+// const options = {
+//   cert: fs.readFileSync(path.join(__dirname, '../../../certs/localhost.crt')),
+//   key: fs.readFileSync(path.join(__dirname, '../../../certs/localhost.key'))
+// };
 
 // Log startup
 logger.info('🚀 Backend starting', { port: PORT, env: process.env.NODE_ENV });
 
-https.createServer(options, app).listen(PORT, () => {
+http.createServer(options, app).listen(PORT, () => {
   logger.info('🔒 HTTPS Server running', { 
     url: `https://localhost:${PORT}`,
     swagger: `https://localhost:${PORT}/api-docs`
