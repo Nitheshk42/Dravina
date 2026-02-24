@@ -114,5 +114,68 @@ const getBalance = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong!' });
   }
 };
+// ─── GET LIMITS ──────────────────────────────────────────────
+const getLimits = async (req, res) => {
+  try {
+    const userId = req.user.userId;
 
-module.exports = { sendMoney, getHistory, getBalance };
+    const DAILY_LIMIT = 5000;
+    const WEEKLY_LIMIT = 20000;
+
+    // Get start of today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Get start of this week (Monday)
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Get today's transactions
+    const dailyTransactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        status: 'Completed',
+        createdAt: { gte: startOfDay }
+      }
+    });
+
+    // Get this week's transactions
+    const weeklyTransactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        status: 'Completed',
+        createdAt: { gte: startOfWeek }
+      }
+    });
+
+    // Calculate used amounts
+    const dailyUsed = dailyTransactions.reduce((sum, t) => sum + t.amountSent, 0);
+    const weeklyUsed = weeklyTransactions.reduce((sum, t) => sum + t.amountSent, 0);
+
+    logger.info('Limits fetched', { userId, dailyUsed, weeklyUsed });
+
+    res.status(200).json({
+      daily: {
+        used: dailyUsed,
+        limit: DAILY_LIMIT,
+        remaining: DAILY_LIMIT - dailyUsed,
+        percentage: Math.round((dailyUsed / DAILY_LIMIT) * 100)
+      },
+      weekly: {
+        used: weeklyUsed,
+        limit: WEEKLY_LIMIT,
+        remaining: WEEKLY_LIMIT - weeklyUsed,
+        percentage: Math.round((weeklyUsed / WEEKLY_LIMIT) * 100)
+      }
+    });
+
+  } catch (error) {
+    logger.error('Limits error', { error: error.message });
+    res.status(500).json({ message: 'Something went wrong!' });
+  }
+};
+
+module.exports = { sendMoney, getHistory, getBalance, getLimits };
+
+//module.exports = { sendMoney, getHistory, getBalance };

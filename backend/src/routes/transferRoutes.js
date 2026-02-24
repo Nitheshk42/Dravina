@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendMoney, getHistory, getBalance } = require('../controllers/transferController');
+const { sendMoney, getHistory, getBalance, getLimits } = require('../controllers/transferController');
 const { protect } = require('../middleware/authMiddleware');
 
 /**
@@ -74,5 +74,7 @@ router.get('/history', protect, getHistory);
  *         description: Unauthorized - No token
  */
 router.get('/balance', protect, getBalance);
+
+router.get('/limits', protect, getLimits);
 
 module.exports = router;

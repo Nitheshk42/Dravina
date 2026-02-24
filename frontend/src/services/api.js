@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://localhost:5001/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://localhost:5001/api',
   //httpsAgent: new https.Agent({ rejectUnauthorized: false })
 });
 
@@ -22,3 +22,4 @@ export const loginUser = (data) => API.post('/auth/login', data);
 export const sendMoney = (data) => API.post('/transfer/send', data);
 export const getHistory = () => API.get('/transfer/history');
 export const getBalance = () => API.get('/transfer/balance');
+export const getLimits = () => API.get('/transfer/limits');
