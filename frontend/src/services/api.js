@@ -23,3 +23,7 @@ export const sendMoney = (data) => API.post('/transfer/send', data);
 export const getHistory = () => API.get('/transfer/history');
 export const getBalance = () => API.get('/transfer/balance');
 export const getLimits = () => API.get('/transfer/limits');
+
+// ─── PAYMENT ─────────────────────────────────────────────────
+export const createPaymentIntent = (data) => API.post('/payment/create-intent', data);
+export const confirmPayment = (data) => API.post('/payment/confirm', data);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { getBalance, getLimits } from '../services/api';
+import AddMoneyModal from '../components/AddMoneyModal';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ function Dashboard() {
   daily: { used: 0, limit: 5000, percentage: 0 },
   weekly: { used: 0, limit: 20000, percentage: 0 }
 });
+const [showAddMoney, setShowAddMoney] = useState(false);
 
   const fetchRates = async () => {
     try {
@@ -337,6 +339,23 @@ useEffect(() => {
               >
                 📋 History
               </button>
+
+              {/* Add Money Button */}
+                <button
+                  onClick={() => setShowAddMoney(true)}
+                  style={{
+                    width: '100%', padding: '18px', border: 'none',
+                    borderRadius: '16px', marginTop: '4px',
+                    background: 'linear-gradient(135deg, #1a7a6e, #0f4c81)',
+                    color: 'white', fontWeight: '700', fontSize: '14px',
+                    cursor: 'pointer', transition: 'transform 0.2s',
+                    fontFamily: 'Sora, sans-serif'
+                  }}
+                  onMouseOver={e => e.target.style.transform = 'translateY(-2px)'}
+                  onMouseOut={e => e.target.style.transform = 'translateY(0)'}
+                >
+                  💰 Add Money
+                </button>
             </div>
 
           </div>
@@ -442,7 +461,17 @@ useEffect(() => {
             <FaInstagram size={26} style={{ color: '#e1306c', cursor: 'pointer' }} onClick={() => window.open('#', '_blank')} />
           </div>
         </div>
-
+        {/* Add Money Modal */}
+        {showAddMoney && (
+          <AddMoneyModal
+            onClose={() => setShowAddMoney(false)}
+            onSuccess={(amount) => {
+              setBalance(prev => prev + amount);
+              setShowAddMoney(false);
+              alert(`✅ $${amount} added to your wallet!`);
+            }}
+          />
+        )}
       </div>
     </div>
   );

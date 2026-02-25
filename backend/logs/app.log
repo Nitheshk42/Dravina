@@ -1,0 +1,39 @@
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-02-25T12:04:36.293Z"}
+{"level":"info","message":"🔒 HTTPS Server running locally","swagger":"https://localhost:5001/api-docs","timestamp":"2026-02-25T12:04:36.307Z","url":"https://localhost:5001"}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:30:31.125Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:30:31.127Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:30:31.133Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:30:31.137Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"amount":150,"level":"info","message":"Payment intent created","timestamp":"2026-02-25T12:30:53.574Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-02-25T12:34:21.676Z"}
+{"level":"info","message":"🔒 HTTPS Server running locally","swagger":"https://localhost:5001/api-docs","timestamp":"2026-02-25T12:34:21.690Z","url":"https://localhost:5001"}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:34:40.958Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:34:40.962Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:34:40.962Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:34:40.970Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"amount":123,"level":"info","message":"Payment intent created","timestamp":"2026-02-25T12:35:11.701Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:36:29.697Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:36:29.704Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:36:29.707Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:36:29.711Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:36:33.011Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:36:33.014Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:36:33.025Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:36:33.034Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:36:34.076Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:36:34.077Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:36:34.084Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:36:34.093Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"amount":123,"level":"info","message":"Payment intent created","timestamp":"2026-02-25T12:36:53.597Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"error":"\nInvalid `prisma.user.update()` invocation in\n/Users/nitheshkumar/Documents1/crobo-app/backend/src/controllers/paymentController.js:98:23\n\n  95 const user = await prisma.user.findUnique({ where: { id: userId } });\n  96 \n  97 // Add balance to user\n→ 98 await prisma.user.update(\nAn operation failed because it depends on one or more records that were required but not found. No record was found for an update.","level":"error","message":"Confirm payment error","timestamp":"2026-02-25T12:36:54.778Z"}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:38:57.843Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:38:57.844Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:38:57.847Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:38:57.848Z","userId":"bc511e73-80e0-4642-b9c7-9f5a0c493bae","weeklyUsed":0}
+{"email":"john@email.com","level":"info","message":"User logged in successfully","timestamp":"2026-02-25T12:39:12.833Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb"}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:39:13.005Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:39:13.007Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb","weeklyUsed":350}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-25T12:39:13.010Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb"}
+{"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-02-25T12:39:13.013Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb","weeklyUsed":350}
+{"amount":200,"level":"info","message":"Payment intent created","timestamp":"2026-02-25T12:39:35.815Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb"}
+{"amount":200,"level":"info","message":"Balance topped up","timestamp":"2026-02-25T12:39:36.953Z","userId":"3d639f83-625e-4dfb-bc1f-65f9a585f8eb"}
