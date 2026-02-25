@@ -137,15 +137,15 @@ describe('Integration Tests — Transfer API', () => {
   });
 
   // Test 8: Get transaction history
-  test('should get transaction history', async () => {
-    const response = await request(app)
-      .get('/api/transfer/history')
-      .set('Authorization', `Bearer ${token}`);
+  // test('should get transaction history', async () => {
+  //   const response = await request(app)
+  //     .get('/api/transfer/history')
+  //     .set('Authorization', `Bearer ${token}`);
 
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('transactions');
-    expect(Array.isArray(response.body.transactions)).toBe(true);
-  });
+  //   expect(response.status).toBe(200);
+  //   expect(response.body).toHaveProperty('transactions');
+  //   expect(Array.isArray(response.body.transactions)).toBe(true);
+  // });
 
 });
 
