@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import SendMoney from './pages/SendMoney';
 import Confirm from './pages/Confirm';
 import History from './pages/History';
+import ProtectedRoute from './components/ProtectedRoute';
 import Recipients from './pages/Recipients';
 
 function App() {
@@ -13,11 +14,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/send" element={<SendMoney />} />
-        <Route path="/confirm" element={<Confirm />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/recipients" element={<Recipients />} />
+       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/send" element={<ProtectedRoute><SendMoney /></ProtectedRoute>} />
+        <Route path="/confirm" element={<ProtectedRoute><Confirm /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+        <Route path="/recipients" element={<ProtectedRoute><Recipients /></ProtectedRoute>} />
       </Routes>
     </HashRouter>
   );

@@ -518,3 +518,9 @@
 {"dailyUsed":50,"level":"info","message":"Limits fetched","timestamp":"2026-02-26T12:36:43.752Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":50}
 {"level":"info","message":"Balance fetched","timestamp":"2026-02-26T12:36:43.755Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
 {"dailyUsed":50,"level":"info","message":"Limits fetched","timestamp":"2026-02-26T12:36:43.756Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":50}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-26T12:55:51.643Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
+{"count":1,"level":"info","message":"Recipients fetched","timestamp":"2026-02-26T12:55:51.645Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
+{"dailyUsed":50,"level":"info","message":"Limits fetched","timestamp":"2026-02-26T12:55:51.646Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":50}
+{"level":"info","message":"Balance fetched","timestamp":"2026-02-26T12:55:51.653Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
+{"count":1,"level":"info","message":"Recipients fetched","timestamp":"2026-02-26T12:55:51.653Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
+{"dailyUsed":50,"level":"info","message":"Limits fetched","timestamp":"2026-02-26T12:55:51.657Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":50}
