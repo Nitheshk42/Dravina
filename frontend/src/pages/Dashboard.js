@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
-import { getBalance, getLimits } from '../services/api';
+import { getBalance, getLimits, getRecipients } from '../services/api';
 import AddMoneyModal from '../components/AddMoneyModal';
+import AddRecipientModal from '../components/AddRecipientModal';
+
+
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -12,6 +15,8 @@ function Dashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
+  const [showAddRecipient, setShowAddRecipient] = useState(false);
+  const [recipients, setRecipients] = useState([]);
   const [limits, setLimits] = useState({
   daily: { used: 0, limit: 5000, percentage: 0 },
   weekly: { used: 0, limit: 20000, percentage: 0 }
@@ -19,17 +24,94 @@ function Dashboard() {
 const [showAddMoney, setShowAddMoney] = useState(false);
 
   const fetchRates = async () => {
-    try {
-      const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=GBP,EUR,INR,AUD,CAD,SGD,AED');
-      const data = await response.json();
-      setRates(data.rates);
-      setLastUpdated(new Date().toLocaleTimeString());
-      setLoading(false);
-    } catch (error) {
-      console.log('Error fetching rates:', error);
-      setLoading(false);
-    }
-  };
+
+  // ─── API 1: Frankfurter.app ───────────────────────────
+  try {
+    console.log('🔄 Trying API 1 — Frankfurter...');
+    const response = await fetch(
+      'https://fake-api.frankfurter.app/latest?from=USD&to=GBP,EUR,INR,AUD,CAD,SGD,AED',
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!response.ok) throw new Error('API 1 failed');
+    const data = await response.json();
+    setRates(data.rates);
+    setLastUpdated(new Date().toLocaleTimeString());
+    setLoading(false);
+    console.log('✅ API 1 success!');
+    return;
+  } catch (error) {
+    console.log('❌ API 1 failed — retrying...', error.message);
+  }
+
+  // ─── API 1 RETRY ─────────────────────────────────────
+  try {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('🔄 Retrying API 1...');
+    const response = await fetch(
+      'https://fake-api.frankfurter.app/latest?from=USD&to=GBP,EUR,INR,AUD,CAD,SGD,AED',
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!response.ok) throw new Error('API 1 retry failed');
+    const data = await response.json();
+    setRates(data.rates);
+    setLastUpdated(new Date().toLocaleTimeString());
+    setLoading(false);
+    console.log('✅ API 1 retry success!');
+    return;
+  } catch (error) {
+    console.log('❌ API 1 retry failed — switching to API 2...', error.message);
+  }
+
+  // ─── API 2: ExchangeRate-API Open Access ──────────────
+  try {
+    console.log('🔄 Trying API 2 — ExchangeRate-API...');
+    const response = await fetch(
+      'https://open.er-api.com/v6/latest/USD',
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!response.ok) throw new Error('API 2 failed');
+    const data = await response.json();
+    const { GBP, EUR, INR, AUD, CAD, SGD, AED } = data.rates;
+    setRates({ GBP, EUR, INR, AUD, CAD, SGD, AED });
+    setLastUpdated(new Date().toLocaleTimeString());
+    setLoading(false);
+    console.log('✅ API 2 success!');
+    return;
+  } catch (error) {
+    console.log('❌ API 2 failed — switching to API 3...', error.message);
+  }
+
+  // ─── API 3: Fawaz Currency API ────────────────────────
+  try {
+    console.log('🔄 Trying API 3 — Fawaz Currency API...');
+    const response = await fetch(
+      'https://fake-cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!response.ok) throw new Error('API 3 failed');
+    const data = await response.json();
+    const r = data.usd;
+    setRates({
+      GBP: r.gbp, EUR: r.eur, INR: r.inr,
+      AUD: r.aud, CAD: r.cad, SGD: r.sgd, AED: r.aed
+    });
+    setLastUpdated(new Date().toLocaleTimeString());
+    setLoading(false);
+    console.log('✅ API 3 success!');
+    return;
+  } catch (error) {
+    console.log('❌ API 3 failed — all APIs down!', error.message);
+  }
+
+  // ─── ALL APIS FAILED — use fallback rates ─────────────
+  console.log('🚨 All APIs failed — using fallback rates!');
+  setRates({
+    GBP: 0.79, EUR: 0.92, INR: 83.12,
+    AUD: 1.53, CAD: 1.36, SGD: 1.34, AED: 3.67
+  });
+  setLastUpdated('Cached rates');
+  setLoading(false);
+};
 
  // Fetch real user balance
 
@@ -38,6 +120,20 @@ useEffect(() => {
   const interval = setInterval(fetchRates, 30000);
   return () => clearInterval(interval);
 }, []);
+
+    // Fetch recipients
+    useEffect(() => {
+      const fetchRecipients = async () => {
+        try {
+          const response = await getRecipients();
+          setRecipients(response.data.recipients);
+        } catch (error) {
+          console.log('Error fetching recipients:', error);
+        }
+      };
+      fetchRecipients();
+    }, []);
+
 
 // Fetch real limits
 useEffect(() => {
@@ -358,6 +454,46 @@ useEffect(() => {
                 </button>
             </div>
 
+                  {/* Recipients Section */}
+            <div style={{
+              background: 'white', borderRadius: '20px',
+              padding: '20px', marginTop: '16px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <p style={{ fontWeight: '700', fontSize: '15px', color: '#1a1a2e', margin: 0 }}>
+                  👥 Recipients
+                </p>
+                <p
+                  onClick={() => navigate('/recipients')}
+                  style={{
+                    fontSize: '13px', color: '#0f4c81',
+                    margin: '4px 0 0', cursor: 'pointer',
+                    textDecoration: 'underline', fontWeight: '500'
+                  }}
+                >
+                  View all recipients →
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowAddRecipient(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #0f4c81, #1a7a6e)',
+                  color: 'white', border: 'none',
+                  borderRadius: '12px', padding: '10px 18px',
+                  fontWeight: '600', fontSize: '13px',
+                  cursor: 'pointer', fontFamily: 'Sora, sans-serif'
+                }}
+              >
+                + Add New
+              </button>
+            
+
+          
+          </div>
           </div>
 
           {/* RIGHT COLUMN - Live Rates */}
@@ -461,6 +597,7 @@ useEffect(() => {
             <FaInstagram size={26} style={{ color: '#e1306c', cursor: 'pointer' }} onClick={() => window.open('#', '_blank')} />
           </div>
         </div>
+
         {/* Add Money Modal */}
         {showAddMoney && (
           <AddMoneyModal
@@ -472,6 +609,18 @@ useEffect(() => {
             }}
           />
         )}
+        {/* Add Recipient Modal */}
+        {showAddRecipient && (
+          <AddRecipientModal
+            onClose={() => setShowAddRecipient(false)}
+            onSuccess={(recipient) => {
+              setRecipients(prev => [recipient, ...prev]);
+              setShowAddRecipient(false);
+              alert(`✅ ${recipient.fullName} added successfully!`);
+            }}
+          />
+        )}
+      
       </div>
     </div>
   );

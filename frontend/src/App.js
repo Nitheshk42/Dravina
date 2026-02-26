@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import SendMoney from './pages/SendMoney';
 import Confirm from './pages/Confirm';
 import History from './pages/History';
+import Recipients from './pages/Recipients';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/send" element={<SendMoney />} />
         <Route path="/confirm" element={<Confirm />} />
         <Route path="/history" element={<History />} />
+        <Route path="/recipients" element={<Recipients />} />
       </Routes>
     </HashRouter>
   );

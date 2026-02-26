@@ -27,3 +27,9 @@ export const getLimits = () => API.get('/transfer/limits');
 // ─── PAYMENT ─────────────────────────────────────────────────
 export const createPaymentIntent = (data) => API.post('/payment/create-intent', data);
 export const confirmPayment = (data) => API.post('/payment/confirm', data);
+
+// ─── RECIPIENTS ──────────────────────────────────────────────
+export const addRecipient = (data) => API.post('/recipient/add', data);
+export const getRecipients = () => API.get('/recipient/list');
+export const deleteRecipient = (id) => API.delete(`/recipient/${id}`);
+export const updateRecipient = (id, data) => API.put(`/recipient/${id}`, data);

@@ -31,6 +31,7 @@ model User {
 
   transactions Transaction[]
   deposits Deposit[]
+  recipients Recipient[]
 }
 
 model Transaction {
@@ -56,5 +57,20 @@ model Deposit {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model Recipient {
+  id            String   @id @default(uuid())
+  userId        String
+  fullName      String
+  email         String
+  phone         String
+  country       String
+  bankAccount   String
+  ifscCode      String
+  transferringTo String  @default("Someone Else")
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id])
 }
 

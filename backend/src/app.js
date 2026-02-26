@@ -6,6 +6,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const transferRoutes = require('./routes/transferRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const recipientRoutes = require('./routes/recipientRoutes');
 const swaggerSpec = require('./swagger');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRoutes);
 app.use('/api/transfer', transferRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/recipient', recipientRoutes);
 
 // Test route
 app.get('/', (req, res) => {
