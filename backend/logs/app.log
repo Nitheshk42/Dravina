@@ -811,3 +811,5 @@
 {"count":1,"deposits":2,"level":"info","message":"History fetched","timestamp":"2026-02-28T00:21:23.914Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
 {"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-02-28T00:23:15.394Z"}
 {"level":"info","message":"🔒 HTTPS Server running locally","swagger":"https://localhost:5001/api-docs","timestamp":"2026-02-28T00:23:15.409Z","url":"https://localhost:5001"}
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-02-28T00:30:14.124Z"}
+{"level":"info","message":"🔒 HTTPS Server running locally","swagger":"https://localhost:5001/api-docs","timestamp":"2026-02-28T00:30:14.139Z","url":"https://localhost:5001"}
