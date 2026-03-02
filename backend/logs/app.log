@@ -1000,3 +1000,7 @@
 {"level":"info","message":"Balance fetched","timestamp":"2026-03-02T18:24:27.259Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
 {"dailyUsed":0,"level":"info","message":"Limits fetched","timestamp":"2026-03-02T18:24:27.260Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":0}
 {"level":"info","message":"User logged out","timestamp":"2026-03-02T18:24:29.246Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-03-02T23:48:06.140Z"}
+{"level":"info","message":"🚀 HTTP Server running locally","swagger":"http://localhost:5001/api-docs","timestamp":"2026-03-02T23:48:06.142Z","url":"http://localhost:5001"}
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-03-02T23:52:46.616Z"}
+{"level":"info","message":"🚀 HTTP Server running locally","swagger":"http://localhost:5001/api-docs","timestamp":"2026-03-02T23:52:46.618Z","url":"http://localhost:5001"}

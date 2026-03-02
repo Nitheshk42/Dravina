@@ -14,7 +14,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://localhost:3000', 'https://localhost:3001', 'https://crobo-frontend.onrender.com'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://localhost:3000', 'https://localhost:3001', 'hhttps://dravina-62qg.onrender.com'],
   credentials: true,
 }));
 // For Stripe webhooks, we need raw body, so we set this route before the JSON parser
