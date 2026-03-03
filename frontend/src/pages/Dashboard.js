@@ -6,7 +6,7 @@ import AddMoneyModal from '../components/AddMoneyModal';
 import AddRecipientModal from '../components/AddRecipientModal';
 
 // ─── CHANGE THIS TO SWITCH MOBILE THEME (1, 2, or 3) ────────
-const MOBILE_THEME = 3;
+const MOBILE_THEME = 2;
 
 // ─── ANIMATIONS ──────────────────────────────────────────────
 const styles = `

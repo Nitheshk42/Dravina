@@ -1257,3 +1257,10 @@
 {"dailyUsed":200,"level":"info","message":"Limits fetched","timestamp":"2026-03-03T17:29:16.049Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":200}
 {"level":"info","message":"Balance fetched","timestamp":"2026-03-03T17:29:16.050Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
 {"dailyUsed":200,"level":"info","message":"Limits fetched","timestamp":"2026-03-03T17:29:16.057Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8","weeklyUsed":200}
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-03-03T18:00:33.608Z"}
+{"level":"info","message":"🚀 HTTP Server running locally","swagger":"http://localhost:5001/api-docs","timestamp":"2026-03-03T18:00:33.612Z","url":"http://localhost:5001"}
+{"level":"info","message":"🚀 Backend starting","port":5001,"timestamp":"2026-03-03T18:00:56.469Z"}
+{"level":"info","message":"🚀 HTTP Server running locally","swagger":"http://localhost:5001/api-docs","timestamp":"2026-03-03T18:00:56.472Z","url":"http://localhost:5001"}
+{"error":"jwt expired","level":"warn","message":"Invalid token","timestamp":"2026-03-03T18:08:29.708Z"}
+{"level":"info","message":"Access token refreshed","timestamp":"2026-03-03T18:08:29.842Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}
+{"level":"info","message":"Balance fetched","timestamp":"2026-03-03T18:08:29.868Z","userId":"45f0f489-2f3f-47df-9a52-7561940bbac8"}

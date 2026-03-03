@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const { client } = require('../../config/cassandra');
 
 // ─── GET ALL ACCOUNTS FOR USER ────────────────────────────────
@@ -31,7 +31,7 @@ const addAccount = async (req, res) => {
       return res.status(400).json({ message: 'holder_name, bank_name, country and account_type are required' });
     }
 
-    const accountId = uuidv4();
+    const accountId = randomUUID();
     const createdAt = new Date();
 
     const query = `
