@@ -9,7 +9,14 @@ const PORT = process.env.PORT || 5001;
 logger.info('🚀 Backend starting', { port: PORT, env: process.env.NODE_ENV });
 
 // Connect Cassandra ← add this
-connectCassandra();
+if (process.env.NODE_ENV === 'production') {
+  const { connectAstra } = require('../config/astraClient');
+  connectAstra();
+} else {
+  const { connectCassandra } = require('../config/cassandra');
+  connectCassandra();
+}
+
 
 // Use HTTP on production (Render handles SSL)
 // Use HTTPS on local (self signed cert)

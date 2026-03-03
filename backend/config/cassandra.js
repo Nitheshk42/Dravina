@@ -1,5 +1,6 @@
 const cassandra = require('cassandra-driver');
 
+// Local Docker only
 const client = new cassandra.Client({
   contactPoints: ['localhost'],
   localDataCenter: 'datacenter1',
