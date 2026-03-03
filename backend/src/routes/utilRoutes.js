@@ -28,16 +28,62 @@ router.get('/rates', async (req, res) => {
 });
 
 // ─── IP LOCATION ──────────────────────────────────────────────
+// router.get('/location', async (req, res) => {
+//   try {
+//     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+    
+//     // If no forwarded IP (local dev), call without IP — API auto-detects
+//     const url = ip ? `https://freeipapi.com/api/json/${ip}` : 'https://freeipapi.com/api/json';
+    
+//     const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
+//     if (!response.ok) throw new Error('failed');
+//     const data = await response.json();
+//     console.log('📍 Location detected:', data); // ← see full response
+//     return res.json({ countryCode: data.countryCode });
+//   } catch (err) {
+//     console.error('❌ Location error:', err.message);
+//   }
+//   res.json({ countryCode: 'US' });
+// });
+
 router.get('/location', async (req, res) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+  
+  // Try 1 — ipapi.co (no IP needed, auto-detects)
   try {
-    // Get real IP — works behind proxies/Render
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
-    const response = await fetch(`https://freeipapi.com/api/json/${ip}`);
-    if (!response.ok) throw new Error('failed');
+    const url = ip ? `https://ipapi.co/${ip}/json/` : 'https://ipapi.co/json/';
+    const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
     const data = await response.json();
-    return res.json({ countryCode: data.countryCode });
-  } catch {}
-  res.json({ countryCode: 'US' }); // fallback
+    console.log('📍 ipapi.co result:', data.country_code);
+    if (data.country_code) return res.json({ countryCode: data.country_code });
+  } catch (err) {
+    console.log('❌ ipapi.co failed:', err.message);
+  }
+
+  // Try 2 — ip-api.com
+  try {
+    const url = ip ? `http://ip-api.com/json/${ip}` : 'http://ip-api.com/json/';
+    const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
+    const data = await response.json();
+    console.log('📍 ip-api.com result:', data.countryCode);
+    if (data.countryCode) return res.json({ countryCode: data.countryCode });
+  } catch (err) {
+    console.log('❌ ip-api.com failed:', err.message);
+  }
+
+  // Try 3 — ipinfo.io
+  try {
+    const url = ip ? `https://ipinfo.io/${ip}/json` : 'https://ipinfo.io/json';
+    const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
+    const data = await response.json();
+    console.log('📍 ipinfo.io result:', data.country);
+    if (data.country) return res.json({ countryCode: data.country });
+  } catch (err) {
+    console.log('❌ ipinfo.io failed:', err.message);
+  }
+
+  console.log('⚠️ All location APIs failed, defaulting to US');
+  res.json({ countryCode: 'US' });
 });
 
 module.exports = router;

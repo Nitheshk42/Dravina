@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, Line } from 'react-simple-maps';
+import API from '../services/api';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
+// ─── COUNTRY COORDINATES ─────────────────────────────────────
 const countryCoords = {
   'United States': [-95, 38],
   'United Kingdom': [-2, 54],
@@ -13,10 +16,51 @@ const countryCoords = {
   'UAE': [54, 24],
 };
 
+// ─── COUNTRY CODE → NAME + COORDS MAP ────────────────────────
+const countryCodeMap = {
+  US: { name: 'United States', flag: '🇺🇸', coords: [-95, 38] },
+  IN: { name: 'India',         flag: '🇮🇳', coords: [78, 22] },
+  GB: { name: 'United Kingdom',flag: '🇬🇧', coords: [-2, 54] },
+  AU: { name: 'Australia',     flag: '🇦🇺', coords: [133, -25] },
+  CA: { name: 'Canada',        flag: '🇨🇦', coords: [-96, 60] },
+  SG: { name: 'Singapore',     flag: '🇸🇬', coords: [103, 1] },
+  AE: { name: 'UAE',           flag: '🇦🇪', coords: [54, 24] },
+  DE: { name: 'Germany',       flag: '🇩🇪', coords: [10, 51] },
+  FR: { name: 'France',        flag: '🇫🇷', coords: [2, 46] },
+  NL: { name: 'Netherlands',   flag: '🇳🇱', coords: [5, 52] },
+};
+
 function WorldMap({ selectedCountry, recipientCountry }) {
-  const userCoords = [-95, 38];
+  const [userLocation, setUserLocation] = useState({
+    coords: [-95, 38],
+    name: 'United States',
+    flag: '🇺🇸',
+  });
+  const [locationLoading, setLocationLoading] = useState(true);
+
+  // ── Detect user location ──
+  useEffect(() => {
+    const detect = async () => {
+      try {
+        const res = await API.get('/utils/location');
+        const countryCode = res.data.countryCode;
+        const locationData = countryCodeMap[countryCode];
+        if (locationData) {
+          setUserLocation({
+            coords: locationData.coords,
+            name: locationData.name,
+            flag: locationData.flag,
+          });
+        }
+      } catch {}
+      setLocationLoading(false);
+    };
+    detect();
+  }, []);
+
   const destCoords = countryCoords[selectedCountry] || null;
   const recipientCoords = countryCoords[recipientCountry] || null;
+  const userCoords = userLocation.coords;
 
   return (
     <div style={{
@@ -36,9 +80,11 @@ function WorldMap({ selectedCountry, recipientCountry }) {
           🌍 Transfer Route
         </p>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: '4px 0 0' }}>
-          {selectedCountry
-            ? `USA → ${selectedCountry}`
-            : 'Select a country to see route'}
+          {locationLoading
+            ? 'Detecting your location...'
+            : selectedCountry
+              ? `${userLocation.flag} ${userLocation.name} → ${selectedCountry}`
+              : 'Select a country to see route'}
         </p>
       </div>
 
@@ -57,15 +103,15 @@ function WorldMap({ selectedCountry, recipientCountry }) {
                   geography={geo}
                   style={{
                     default: { fill: '#1a3a5c', stroke: '#0a1628', strokeWidth: 0.5, outline: 'none' },
-                    hover: { fill: '#1a3a5c', outline: 'none' },
-                    pressed: { fill: '#1a3a5c', outline: 'none' }
+                    hover:   { fill: '#1a3a5c', outline: 'none' },
+                    pressed: { fill: '#1a3a5c', outline: 'none' },
                   }}
                 />
               ))
             }
           </Geographies>
 
-          {/* Line to selected country */}
+          {/* Line to destination country */}
           {destCoords && (
             <Line
               from={userCoords}
@@ -77,7 +123,7 @@ function WorldMap({ selectedCountry, recipientCountry }) {
             />
           )}
 
-          {/* Line to recipient country */}
+          {/* Line to recipient country (if different) */}
           {recipientCoords && recipientCountry !== selectedCountry && (
             <Line
               from={userCoords}
@@ -89,13 +135,13 @@ function WorldMap({ selectedCountry, recipientCountry }) {
             />
           )}
 
-          {/* User Marker */}
+          {/* User Marker — dynamic location */}
           <Marker coordinates={userCoords}>
             <circle r={12} fill="#0f4c81" stroke="white" strokeWidth={2} />
             <circle r={22} fill="#0f4c81" fillOpacity={0.3} />
             <text textAnchor="middle" y={-28}
               style={{ fontSize: '11px', fill: 'white', fontWeight: '700', fontFamily: 'Arial' }}>
-              🏠 You
+              {locationLoading ? '📍 You' : `${userLocation.flag} You`}
             </text>
           </Marker>
 
@@ -135,12 +181,16 @@ function WorldMap({ selectedCountry, recipientCountry }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', margin: 0 }}>FROM</p>
-              <p style={{ color: 'white', fontWeight: '700', fontSize: '14px', margin: '2px 0 0' }}>🇺🇸 United States</p>
+              <p style={{ color: 'white', fontWeight: '700', fontSize: '14px', margin: '2px 0 0' }}>
+                {userLocation.flag} {userLocation.name}
+              </p>
             </div>
             <p style={{ color: '#1a7a6e', fontSize: '24px', margin: 0 }}>→</p>
             <div style={{ textAlign: 'right' }}>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', margin: 0 }}>TO</p>
-              <p style={{ color: 'white', fontWeight: '700', fontSize: '14px', margin: '2px 0 0' }}>💸 {selectedCountry}</p>
+              <p style={{ color: 'white', fontWeight: '700', fontSize: '14px', margin: '2px 0 0' }}>
+                💸 {selectedCountry}
+              </p>
             </div>
           </div>
         </div>
@@ -160,7 +210,9 @@ function WorldMap({ selectedCountry, recipientCountry }) {
       <div style={{ display: 'flex', gap: '16px', marginTop: '12px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#0f4c81' }} />
-          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>Your location</span>
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>
+            {userLocation.flag} {userLocation.name}
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#1a7a6e' }} />
