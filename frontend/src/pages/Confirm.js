@@ -30,12 +30,12 @@ function Confirm() {
         country: data.country.name,
         exchangeRate: parseFloat(data.exchangeRate),
       });
+      alert('🎉 Transfer successful!');  // ← add this
       navigate('/history');
     } catch (error) {
       alert(error.response?.data?.message || 'Something went wrong!');
     }
   };
-
   return (
     <div className="min-h-screen" style={{background:'#f7f8fc', fontFamily:"'Sora', sans-serif"}}>
 

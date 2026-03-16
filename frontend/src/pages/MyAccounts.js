@@ -88,7 +88,7 @@ const AccountCard = ({ account, onDelete, index }) => {
           {showDelete && (
             <div className="absolute right-0 top-10 rounded-xl overflow-hidden z-10"
               style={{ background: '#0d2240', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
-              <button onClick={() => onDelete(account.account_id)}
+              <button onClick={() => onDelete(account.accountId)}
                 className="px-4 py-3 text-sm font-bold w-full text-left border-none cursor-pointer"
                 style={{ color: '#e74c3c', background: 'transparent', fontFamily: "'Sora', sans-serif" }}>
                 🗑️ Delete Account
@@ -148,7 +148,7 @@ const handleDelete = async (accountId) => {
   if (!window.confirm('Are you sure you want to delete this account?')) return;
   try {
     await deleteAccount(accountId);
-    setAccounts(prev => prev.filter(a => a.account_id !== accountId));
+    setAccounts(prev => prev.filter(a => a.accountId !== accountId));
   } catch {
     alert('Failed to delete account. Please try again.');
   }
@@ -236,7 +236,7 @@ const handleDelete = async (accountId) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {accounts.map((account, i) => (
               <AccountCard
-                key={account.account_id}
+                key={account.accountId}
                 account={account}
                 onDelete={handleDelete}
                 index={i}

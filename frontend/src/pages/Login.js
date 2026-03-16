@@ -128,21 +128,26 @@ useEffect(() => {
   detect();
 }, []);
 
-  const handleLogin = async () => {
-    try {
-      setError(''); setLoading(true);
-      const response = await loginUser({email, password});
-      const {accessToken, user} = response.data;
-      setAccessToken(accessToken);
-      localStorage.removeItem('token');
-      localStorage.setItem('user', JSON.stringify(user));
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong!');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ── Regular login ──
+const handleLogin = async () => {
+  try {
+    setError(''); setLoading(true);
+    const response = await loginUser({email, password});
+    const {accessToken, user} = response.data;
+    
+    setAccessToken(accessToken);
+    localStorage.removeItem('token');
+    localStorage.setItem('user', JSON.stringify({
+      ...user,
+      name: user.fullName  // ← add this
+    }));
+    navigate('/dashboard');
+  } catch (err) {
+    setError(err.response?.data?.message || 'Something went wrong!');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fromRate = fromCurrency.code === 'USD' ? 1 : (rates[fromCurrency.code] ? 1 / rates[fromCurrency.code] : 1);
   const toRate = selectedCurrency.code === 'USD' ? 1 : (rates[selectedCurrency.code] || 1);
@@ -438,17 +443,21 @@ useEffect(() => {
 
                   <div className="flex justify-center mb-6">
                     <GoogleLogin
-                      onSuccess={async credentialResponse => {
-                        try {
-                          const response = await googleAuth({credential: credentialResponse.credential});
-                          const {accessToken, user} = response.data;
-                          setAccessToken(accessToken);
-                          localStorage.setItem('user', JSON.stringify(user));
-                          navigate('/dashboard');
-                        } catch(err) {
-                          setError('Google login failed. Please try again!');
-                        }
-                      }}
+                      // ── Google login ──
+                        onSuccess={async credentialResponse => {
+                          try {
+                            const response = await googleAuth({credential: credentialResponse.credential});
+                            const {accessToken, user} = response.data;
+                            setAccessToken(accessToken);
+                            localStorage.setItem('user', JSON.stringify({
+                              ...user,
+                              name: user.fullName  // ← add this
+                            }));
+                            navigate('/dashboard');
+                          } catch(err) {
+                            setError('Google login failed. Please try again!');
+                          }
+                        }}
                       onError={() => setError('Google login failed. Please try again!')}
                       width="340" text="continue_with" shape="rectangular" theme="outline"
                     />

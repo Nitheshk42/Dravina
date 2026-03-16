@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5001/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
   withCredentials: true, // ← sends cookies automatically!
 });
 
@@ -61,7 +61,7 @@ API.interceptors.response.use(
       try {
         // Call refresh endpoint — cookie sent automatically!
         const response = await axios.post(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/auth/refresh`,
+          `${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/auth/refresh`,
           {},
           { withCredentials: true }
         );
@@ -124,3 +124,12 @@ export const getRates = () => API.get('/utils/rates');
 export const getUserLocation = () => API.get('/utils/location');
 
 export default API;
+export const getReferralStats = () => API.get('/referral/stats');
+export const generateReferralCode = () => API.post('/referral/generate');
+export const applyReferralCode = (code) => API.post('/referral/apply', { referralCode: code });
+
+// Price Match
+export const getPriceMatchRates = (toCurrency) => API.get(`/pricematch/rates?toCurrency=${toCurrency}`);
+export const verifyPriceMatch = (formData) => API.post('/pricematch/verify', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});

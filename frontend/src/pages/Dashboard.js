@@ -4,6 +4,7 @@ import { FaUserCircle, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa
 import { getBalance, getLimits, getRecipients, logoutUser, clearAccessToken } from '../services/api';
 import AddMoneyModal from '../components/AddMoneyModal';
 import AddRecipientModal from '../components/AddRecipientModal';
+import { getReferralStats, generateReferralCode } from '../services/api';
 
 // ─── CHANGE THIS TO SWITCH MOBILE THEME (1, 2, or 3) ────────
 const MOBILE_THEME = 2;
@@ -62,46 +63,111 @@ const BottomNav = ({ active, navigate, setShowAddRecipient }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════
-// MOBILE THEME 1 — Dark Glass (same feel as desktop)
-// ══════════════════════════════════════════════════════════════
-const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile }) => (
-  <div className="min-h-screen pb-24" style={{background:'linear-gradient(135deg, #060f1e 0%, #0d2240 100%)', fontFamily:"'Sora', sans-serif"}}>
+const ReferralBanner = ({ referral }) => {
+  const [copied, setCopied] = useState(false);
+  
+  if (!referral || !referral.referralCode) return null;
+  
+  const referralLink = `${window.location.origin}/#/signup?ref=${referral.referralCode.trim()}`;
+  
 
-    {/* Subtle grid background */}
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: '🌍 Join Draviṇa!',
+         // text: `Send money globally for just $0.99! Use my referral code ${referralCode} and we both get $25 bonus! 🎁`,
+          url: referralLink,
+        });
+      } catch {}
+    } else {
+      navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="mx-5 mb-5 rounded-2xl p-5"
+      style={{background:'linear-gradient(135deg, #0f4c81 0%, #1a7a6e 100%)', boxShadow:'0 8px 32px rgba(15,76,129,0.3)'}}>
+      <div className="flex items-center gap-2 mb-2">
+        <span style={{fontSize:'20px'}}>🎁</span>
+        <p className="font-extrabold text-white m-0 text-base">Refer & Earn $25!</p>
+      </div>
+      <p className="text-xs m-0 mb-3" style={{color:'rgba(255,255,255,0.7)'}}>
+        Share your code and both you and your friend get <strong style={{color:'#4ecdc4'}}>$25 bonus</strong>!
+      </p>
+      {/* Stats row
+      <div className="flex gap-3 mb-3">
+        <div className="flex-1 rounded-xl p-2.5 text-center" style={{background:'rgba(255,255,255,0.1)'}}>
+          <p className="font-extrabold text-white m-0 text-lg">{referral.totalReferrals}</p>
+          <p className="text-xs m-0" style={{color:'rgba(255,255,255,0.6)'}}>Friends Invited</p>
+        </div>
+        <div className="flex-1 rounded-xl p-2.5 text-center" style={{background:'rgba(255,255,255,0.1)'}}>
+          <p className="font-extrabold m-0 text-lg" style={{color:'#4ecdc4'}}>${referral.totalEarned}</p>
+          <p className="text-xs m-0" style={{color:'rgba(255,255,255,0.6)'}}>Total Earned</p>
+        </div>
+      </div>
+      <div className="rounded-xl px-3 py-2.5 mb-3" style={{background:'rgba(255,255,255,0.15)'}}>
+        <p className="font-bold text-white m-0 text-sm tracking-widest text-center">{referral.referralCode}</p>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={handleCopy}
+          className="flex-1 rounded-xl py-2.5 font-bold text-sm border-none cursor-pointer transition-all duration-200"
+          style={{background: copied ? '#4ecdc4' : 'rgba(255,255,255,0.15)', color:'white'}}>
+          {copied ? '✅ Copied!' : '📋 Copy Code'}
+        </button> */}
+      <button onClick={handleShare}
+        className="w-full rounded-xl py-2.5 font-bold text-sm border-none cursor-pointer transition-all duration-200"
+        style={{background:'white', color:'#0f4c81'}}>
+        🚀 Invite Friend
+      </button>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════════════════════
+// MOBILE THEME 1 — Dark Glass
+// ══════════════════════════════════════════════════════════════
+const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile, referral }) => (
+  <div className="min-h-screen pb-24" style={{background:'linear-gradient(135deg, #060f1e 0%, #0d2240 100%)', fontFamily:"'Sora', sans-serif"}}>
     <div className="fixed inset-0 z-0 opacity-20"
       style={{backgroundImage:'linear-gradient(rgba(26,58,92,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(26,58,92,0.5) 1px, transparent 1px)', backgroundSize:'40px 40px'}}/>
-
-    {/* Header */}
-    <div className="relative z-10 px-5 pt-12 pb-6">
+    <div className="relative z-[9999] px-5 pt-12 pb-6">
       <div className="flex justify-between items-start">
         <div className="fade-in">
           <p className="text-xs font-bold uppercase tracking-widest m-0" style={{color:'#4ecdc4'}}>🌍 Draviṇa</p>
           <h1 className="font-extrabold text-white mt-1 m-0" style={{fontSize:'clamp(22px, 5vw, 28px)'}}>
             Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'} 👋
           </h1>
-          <p className="font-bold text-lg mt-0.5 m-0" style={{color:'rgba(255,255,255,0.7)'}}>{user?.name || '...'}</p>
+          <p className="font-bold text-lg mt-0.5 m-0" style={{color:'rgba(255,255,255,0.7)'}}>{user?.fullName || user?.name || '...'}</p>
         </div>
-        <div className="relative">
+        <div className="relative z-[9999]">
           <button onClick={() => setShowProfile(!showProfile)}
             className="w-12 h-12 rounded-full flex items-center justify-center border-none cursor-pointer"
             style={{background:'rgba(78,205,196,0.15)', border:'2px solid rgba(78,205,196,0.3)'}}>
             <FaUserCircle size={24} color="#4ecdc4" />
           </button>
           {showProfile && (
-            <div className="absolute right-0 top-14 w-64 rounded-2xl p-5 z-50"
+            <div className="absolute right-0 top-14 w-64 rounded-2xl p-5 z-[9999]"
               style={{background:'rgba(13,34,64,0.98)', border:'1px solid rgba(78,205,196,0.2)', backdropFilter:'blur(20px)', boxShadow:'0 20px 60px rgba(0,0,0,0.5)'}}>
-              <p className="font-bold text-base m-0 text-white">{user?.name}</p>
+              <p className="font-bold text-base m-0 text-white">{user?.fullName || user?.name}</p>
               <p className="text-xs m-0 mt-0.5" style={{color:'rgba(255,255,255,0.5)'}}>{user?.email}</p>
               <hr className="my-3" style={{borderColor:'rgba(255,255,255,0.1)'}}/>
-              <button onClick={() => navigate('/accounts')}
-                  className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
-                  🏦 Manage Bank Accounts
-                </button>
-              <button onClick={() => navigate('/faq')}
-              className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
-              ❓ FAQ
-            </button>
+              <button onClick={() => { setShowProfile(false); navigate('/accounts'); }}
+                className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
+                🏦 Manage Bank Accounts
+              </button>
+              <button onClick={() => { setShowProfile(false); navigate('/faq'); }}
+                className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
+                ❓ FAQ
+              </button>
               <button onClick={async () => { await logoutUser(); clearAccessToken(); localStorage.removeItem('user'); navigate('/'); }}
                 className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer"
                 style={{background:'rgba(231,76,60,0.15)', color:'#e74c3c'}}>
@@ -112,16 +178,12 @@ const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         </div>
       </div>
     </div>
-
-    {/* Balance Card */}
-    <div className="relative z-10 px-5 mb-5 fade-in">
+    <div className="relative z-0 px-5 mb-5 fade-in">
       <div className="rounded-3xl p-6 relative overflow-hidden"
         style={{background:'rgba(255,255,255,0.07)', backdropFilter:'blur(20px)', border:'1px solid rgba(78,205,196,0.2)'}}>
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full" style={{background:'rgba(78,205,196,0.06)'}}/>
         <p className="text-xs font-semibold uppercase tracking-widest m-0" style={{color:'rgba(255,255,255,0.5)'}}>Total Balance</p>
-        <h2 className="font-black text-white my-2 m-0" style={{fontSize:'clamp(36px, 8vw, 48px)', letterSpacing:'-2px'}}>
-          ${balance.toFixed(2)}
-        </h2>
+        <h2 className="font-black text-white my-2 m-0" style={{fontSize:'clamp(36px, 8vw, 48px)', letterSpacing:'-2px'}}>${balance.toFixed(2)}</h2>
         <p className="text-xs m-0" style={{color:'rgba(255,255,255,0.4)'}}>🇺🇸 United States Dollar</p>
         <div className="flex items-center gap-1.5 mt-3">
           <div className="w-1.5 h-1.5 rounded-full" style={{background:'#4ecdc4', boxShadow:'0 0 6px #4ecdc4'}}/>
@@ -129,9 +191,8 @@ const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         </div>
       </div>
     </div>
-
-    {/* Quick Actions */}
-    <div className="relative z-10 px-5 mb-5">
+    <ReferralBanner referral={referral} />
+    <div className="relative z-0 px-5 mb-5">
       <p className="text-xs font-bold uppercase tracking-widest mb-3 m-0" style={{color:'rgba(255,255,255,0.4)'}}>Quick Actions</p>
       <div className="grid grid-cols-2 gap-3">
         {[
@@ -154,9 +215,7 @@ const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         ))}
       </div>
     </div>
-
-    {/* Transfer Limits */}
-    <div className="relative z-10 px-5 mb-5">
+    <div className="relative z-0 px-5 mb-5">
       <p className="text-xs font-bold uppercase tracking-widest mb-3 m-0" style={{color:'rgba(255,255,255,0.4)'}}>Transfer Limits</p>
       <div className="rounded-2xl p-5" style={{background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)'}}>
         <div className="flex justify-between items-center mb-4">
@@ -176,9 +235,7 @@ const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         </div>
       </div>
     </div>
-
-    {/* Live Rates */}
-    <div className="relative z-10 px-5 mb-5">
+    <div className="relative z-0 px-5 mb-5">
       <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-bold uppercase tracking-widest m-0" style={{color:'rgba(255,255,255,0.4)'}}>Live Rates</p>
         <div className="flex items-center gap-1.5">
@@ -214,41 +271,39 @@ const MobileTheme1 = ({ user, balance, limits, rates, loading, lastUpdated, curr
 );
 
 // ══════════════════════════════════════════════════════════════
-// MOBILE THEME 2 — Gradient Hero (bold gradient top, white bottom)
+// MOBILE THEME 2 — Gradient Hero
 // ══════════════════════════════════════════════════════════════
-const MobileTheme2 = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile }) => (
+const MobileTheme2 = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile, referral }) => (
   <div className="min-h-screen pb-24" style={{fontFamily:"'Sora', sans-serif"}}>
-
-    {/* Gradient Hero Top */}
     <div className="relative overflow-hidden px-5 pt-12 pb-20"
       style={{background:'linear-gradient(160deg, #0f4c81 0%, #1a7a6e 60%, #4ecdc4 100%)'}}>
       <div className="absolute inset-0 opacity-10"
         style={{backgroundImage:'radial-gradient(circle at 30% 50%, white 1px, transparent 1px)', backgroundSize:'30px 30px'}}/>
-      <div className="flex justify-between items-start relative z-10">
+      <div className="flex justify-between items-start relative z-[9999]">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest m-0" style={{color:'rgba(255,255,255,0.7)'}}>🌍 Draviṇa</p>
           <h1 className="font-extrabold text-white mt-1 m-0" style={{fontSize:'clamp(20px, 5vw, 26px)'}}>
             {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'} 👋
           </h1>
-          <p className="font-semibold mt-0.5 m-0" style={{color:'rgba(255,255,255,0.8)'}}>{user?.name || '...'}</p>
+          <p className="font-semibold mt-0.5 m-0" style={{color:'rgba(255,255,255,0.8)'}}>{user?.fullName || user?.name || '...'}</p>
         </div>
-        <div className="relative">
+        <div className="relative z-[9999]">
           <button onClick={() => setShowProfile(!showProfile)}
             className="w-12 h-12 rounded-full flex items-center justify-center border-none cursor-pointer"
             style={{background:'rgba(255,255,255,0.2)', backdropFilter:'blur(10px)'}}>
             <FaUserCircle size={24} color="white" />
           </button>
           {showProfile && (
-            <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl p-5 z-50"
+            <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl p-5 z-[9999]"
               style={{boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
-              <p className="font-bold text-base m-0" style={{color:'#1a1a2e'}}>{user?.name}</p>
+              <p className="font-bold text-base m-0" style={{color:'#1a1a2e'}}>{user?.fullName || user?.name}</p>
               <p className="text-xs m-0 mt-0.5" style={{color:'#888'}}>{user?.email}</p>
               <hr className="my-3" style={{borderColor:'#f0f0f0'}}/>
-              <button onClick={() => navigate('/accounts')}
+              <button onClick={() => { setShowProfile(false); navigate('/accounts'); }}
                 className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
                 🏦 Manage Bank Accounts
               </button>
-              <button onClick={() => navigate('/faq')}
+              <button onClick={() => { setShowProfile(false); navigate('/faq'); }}
                 className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
                 ❓ FAQ
               </button>
@@ -261,24 +316,17 @@ const MobileTheme2 = ({ user, balance, limits, rates, loading, lastUpdated, curr
           )}
         </div>
       </div>
-
-      {/* Balance - floats over gradient */}
-      <div className="relative z-10 mt-6">
+      <div className="relative z-0 mt-6">
         <p className="text-xs font-semibold uppercase tracking-widest m-0" style={{color:'rgba(255,255,255,0.7)'}}>Total Balance</p>
-        <h2 className="font-black text-white my-1 m-0" style={{fontSize:'clamp(40px, 10vw, 56px)', letterSpacing:'-2px'}}>
-          ${balance.toFixed(2)}
-        </h2>
+        <h2 className="font-black text-white my-1 m-0" style={{fontSize:'clamp(40px, 10vw, 56px)', letterSpacing:'-2px'}}>${balance.toFixed(2)}</h2>
         <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1" style={{background:'rgba(255,255,255,0.15)'}}>
           <div className="w-1.5 h-1.5 rounded-full bg-white"/>
           <span className="text-xs font-semibold text-white">Account Active</span>
         </div>
       </div>
     </div>
-
-    {/* White Bottom Sheet - slides up over gradient */}
     <div className="relative -mt-10 rounded-t-3xl px-5 pt-6" style={{background:'#f7f8fc', minHeight:'60vh'}}>
-
-      {/* Quick Actions */}
+      <ReferralBanner referral={referral} />
       <div className="grid grid-cols-4 gap-2 mb-6">
         {[
           {icon:'💸', label:'Send', action:() => navigate('/send')},
@@ -294,8 +342,6 @@ const MobileTheme2 = ({ user, balance, limits, rates, loading, lastUpdated, curr
           </button>
         ))}
       </div>
-
-      {/* Limits */}
       <div className="bg-white rounded-2xl p-5 mb-4" style={{boxShadow:'0 4px 20px rgba(0,0,0,0.06)'}}>
         <p className="text-xs font-bold uppercase tracking-widest mb-4 m-0" style={{color:'#888'}}>Transfer Limits</p>
         <div className="flex justify-between items-center mb-3">
@@ -314,8 +360,6 @@ const MobileTheme2 = ({ user, balance, limits, rates, loading, lastUpdated, curr
           <CircleProgress percentage={limits.weekly.percentage} color="#1a7a6e" size={50}/>
         </div>
       </div>
-
-      {/* Live Rates */}
       <div className="bg-white rounded-2xl p-5 mb-4" style={{boxShadow:'0 4px 20px rgba(0,0,0,0.06)'}}>
         <div className="flex justify-between items-center mb-4">
           <p className="font-extrabold text-base m-0" style={{color:'#1a1a2e'}}>Live Rates</p>
@@ -344,17 +388,12 @@ const MobileTheme2 = ({ user, balance, limits, rates, loading, lastUpdated, curr
 );
 
 // ══════════════════════════════════════════════════════════════
-// MOBILE THEME 3 — Floating Cards (full dark like landing page)
+// MOBILE THEME 3 — Floating Cards
 // ══════════════════════════════════════════════════════════════
-const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile }) => (
+const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile, referral }) => (
   <div className="min-h-screen pb-24 relative overflow-hidden" style={{background:'#060f1e', fontFamily:"'Sora', sans-serif"}}>
-
-    {/* Animated background dots */}
     <div className="fixed inset-0 z-0">
-      {[
-        {x:'15%',y:'20%'},{x:'75%',y:'15%'},{x:'85%',y:'50%'},
-        {x:'20%',y:'70%'},{x:'60%',y:'80%'}
-      ].map((pos, i) => (
+      {[{x:'15%',y:'20%'},{x:'75%',y:'15%'},{x:'85%',y:'50%'},{x:'20%',y:'70%'},{x:'60%',y:'80%'}].map((pos, i) => (
         <div key={i} className="absolute rounded-full"
           style={{left:pos.x, top:pos.y, width:'6px', height:'6px', background:'#4ecdc4',
             boxShadow:'0 0 12px #4ecdc4', opacity:0.6,
@@ -367,33 +406,31 @@ const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         <line x1="20%" y1="70%" x2="60%" y2="80%" stroke="#1a7a6e" strokeWidth="1" strokeDasharray="6,4"/>
       </svg>
     </div>
-
-    {/* Header */}
-    <div className="relative z-10 px-5 pt-12 pb-4 flex justify-between items-center">
+    <div className="relative z-[9999] px-5 pt-12 pb-4 flex justify-between items-center">
       <div>
         <h1 className="font-black text-white m-0" style={{fontSize:'24px', letterSpacing:'-0.5px'}}>🌍 Draviṇa</h1>
         <p className="text-xs m-0 mt-0.5" style={{color:'rgba(255,255,255,0.35)', letterSpacing:'2px', textTransform:'uppercase'}}>Send Money. Make Happy.</p>
       </div>
-      <div className="relative">
+      <div className="relative z-[9999]">
         <button onClick={() => setShowProfile(!showProfile)}
           className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer"
           style={{background:'rgba(78,205,196,0.1)', border:'1px solid rgba(78,205,196,0.3)'}}>
           <FaUserCircle size={22} color="#4ecdc4" />
         </button>
         {showProfile && (
-          <div className="absolute right-0 top-14 w-60 rounded-2xl p-5 z-50"
+          <div className="absolute right-0 top-14 w-60 rounded-2xl p-5 z-[9999]"
             style={{background:'rgba(13,34,64,0.98)', backdropFilter:'blur(20px)', border:'1px solid rgba(78,205,196,0.2)', boxShadow:'0 20px 60px rgba(0,0,0,0.6)'}}>
-            <p className="font-bold text-sm m-0 text-white">{user?.name}</p>
+            <p className="font-bold text-sm m-0 text-white">{user?.fullName || user?.name}</p>
             <p className="text-xs m-0 mt-0.5" style={{color:'rgba(255,255,255,0.4)'}}>{user?.email}</p>
             <div className="my-3 h-px" style={{background:'rgba(255,255,255,0.1)'}}/>
-            <button onClick={() => navigate('/accounts')}
+            <button onClick={() => { setShowProfile(false); navigate('/accounts'); }}
               className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
               🏦 Manage Bank Accounts
             </button>
-            <button onClick={() => navigate('/faq')}
-                className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
-                ❓ FAQ
-              </button>
+            <button onClick={() => { setShowProfile(false); navigate('/faq'); }}
+              className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
+              ❓ FAQ
+            </button>
             <button onClick={async () => { await logoutUser(); clearAccessToken(); localStorage.removeItem('user'); navigate('/'); }}
               className="w-full py-2.5 rounded-xl font-bold text-xs border-none cursor-pointer"
               style={{background:'rgba(231,76,60,0.15)', color:'#e74c3c', fontFamily:"'Sora', sans-serif"}}>
@@ -403,24 +440,18 @@ const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         )}
       </div>
     </div>
-
-    {/* Greeting */}
     <div className="relative z-10 px-5 mb-4">
       <p className="m-0" style={{color:'rgba(255,255,255,0.5)', fontSize:'14px'}}>
         {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'} 👋
       </p>
-      <h2 className="font-extrabold text-white m-0" style={{fontSize:'clamp(22px, 5vw, 26px)'}}>{user?.name || '...'}</h2>
+      <h2 className="font-extrabold text-white m-0" style={{fontSize:'clamp(22px, 5vw, 26px)'}}>{user?.fullName || user?.name || '...'}</h2>
     </div>
-
-    {/* Floating Balance Card */}
-    <div className="relative z-10 px-5 mb-5">
+    <div className="relative z-0 px-5 mb-5">
       <div className="rounded-3xl p-6 relative overflow-hidden"
         style={{background:'rgba(255,255,255,0.05)', backdropFilter:'blur(24px)', border:'1px solid rgba(255,255,255,0.09)'}}>
         <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full" style={{background:'rgba(78,205,196,0.05)'}}/>
         <p className="text-xs font-semibold uppercase tracking-widest m-0" style={{color:'rgba(255,255,255,0.4)'}}>Total Balance</p>
-        <h2 className="font-black text-white my-2 m-0" style={{fontSize:'clamp(38px, 9vw, 50px)', letterSpacing:'-2px'}}>
-          ${balance.toFixed(2)}
-        </h2>
+        <h2 className="font-black text-white my-2 m-0" style={{fontSize:'clamp(38px, 9vw, 50px)', letterSpacing:'-2px'}}>${balance.toFixed(2)}</h2>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full" style={{background:'#4ecdc4', boxShadow:'0 0 8px #4ecdc4'}}/>
@@ -434,8 +465,6 @@ const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         </div>
       </div>
     </div>
-
-    {/* Currency Mini Cards — horizontal scroll */}
     <div className="relative z-10 mb-5">
       <p className="text-xs font-bold uppercase tracking-widest mb-3 px-5 m-0" style={{color:'rgba(255,255,255,0.35)'}}>Live Rates · 1 USD =</p>
       <div className="flex gap-3 overflow-x-auto px-5 pb-2" style={{scrollbarWidth:'none', WebkitOverflowScrolling:'touch'}}>
@@ -449,9 +478,8 @@ const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         ))}
       </div>
     </div>
-
-    {/* Quick Actions */}
-    <div className="relative z-10 px-5 mb-5">
+    <ReferralBanner referral={referral} />
+    <div className="relative z-0 px-5 mb-5">
       <p className="text-xs font-bold uppercase tracking-widest mb-3 m-0" style={{color:'rgba(255,255,255,0.35)'}}>Quick Actions</p>
       <div className="grid grid-cols-2 gap-3">
         {[
@@ -472,9 +500,7 @@ const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, curr
         ))}
       </div>
     </div>
-
-    {/* Transfer Limits */}
-    <div className="relative z-10 px-5 mb-5">
+    <div className="relative z-0 px-5 mb-5">
       <p className="text-xs font-bold uppercase tracking-widest mb-3 m-0" style={{color:'rgba(255,255,255,0.35)'}}>Transfer Limits</p>
       <div className="rounded-2xl p-5" style={{background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)'}}>
         {[
@@ -498,23 +524,108 @@ const MobileTheme3 = ({ user, balance, limits, rates, loading, lastUpdated, curr
 );
 
 // ══════════════════════════════════════════════════════════════
-// DESKTOP DASHBOARD (unchanged)
+// PRICE PULSE + PRICE MATCH TEASER (desktop right column)
 // ══════════════════════════════════════════════════════════════
-const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile }) => (
+const PricePulse = ({ rates, currencies, lastUpdated, loading }) => {
+  const sparkData = currencies.slice(0, 5).map(c => ({
+    code: c.code, flag: c.flag, name: c.name, rate: rates[c.code] || 0,
+    trend: Array.from({length: 7}, (_, i) => ({
+      value: (rates[c.code] || 1) * (1 + (Math.sin(i + c.code.charCodeAt(0)) * 0.02))
+    }))
+  }));
+  return (
+    <div className="bg-white rounded-3xl p-7" style={{boxShadow:'0 4px 20px rgba(0,0,0,0.06)'}}>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="font-extrabold text-xl m-0" style={{color:'#1a1a2e'}}>📈 Price Pulse</h3>
+          <p className="text-sm mt-1 m-0" style={{color:'#888'}}>7-day rate trends vs USD</p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{background:'#f0f7ff'}}>
+          <span className="w-2 h-2 rounded-full" style={{background:'#0f4c81'}}/>
+          <span className="text-xs font-semibold" style={{color:'#0f4c81'}}>Live Data</span>
+        </div>
+      </div>
+      {loading ? (
+        <div className="flex items-center justify-center h-32"><p style={{color:'#aaa'}}>Fetching rates...</p></div>
+      ) : (
+        <div style={{overflowX:'auto', paddingBottom:'8px'}}>
+          <div style={{display:'flex', gap:'16px', minWidth:'max-content'}}>
+            {sparkData.map(item => {
+              const min = Math.min(...item.trend.map(t => t.value));
+              const max = Math.max(...item.trend.map(t => t.value));
+              const isUp = item.trend[6].value >= item.trend[0].value;
+              const points = item.trend.map((t, i) => {
+                const x = (i / 6) * 140;
+                const y = 40 - ((t.value - min) / (max - min || 1)) * 35;
+                return `${x},${y}`;
+              }).join(' ');
+              return (
+                <div key={item.code} className="rounded-2xl p-4 flex-shrink-0"
+                  style={{background:'#f7f8fc', border:'1.5px solid #f0f0f0', width:'180px'}}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span style={{fontSize:'20px'}}>{item.flag}</span>
+                    <div>
+                      <p className="font-bold text-sm m-0" style={{color:'#1a1a2e'}}>{item.code}</p>
+                      <p className="text-xs m-0" style={{color:'#aaa'}}>{item.name}</p>
+                    </div>
+                  </div>
+                  <svg width="148" height="45" style={{overflow:'visible'}}>
+                    <polyline points={points} fill="none" stroke={isUp ? '#1a7a6e' : '#e74c3c'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx={(6/6)*140} cy={40 - ((item.trend[6].value - min) / (max - min || 1)) * 35} r="3" fill={isUp ? '#1a7a6e' : '#e74c3c'}/>
+                  </svg>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="font-extrabold text-base m-0" style={{color:'#0f4c81'}}>{item.rate.toFixed(4)}</p>
+                    <p className="text-xs font-semibold m-0" style={{color: isUp ? '#1a7a6e' : '#e74c3c'}}>
+                      {isUp ? '↑' : '↓'} {((Math.abs(item.trend[6].value - item.trend[0].value) / item.trend[0].value) * 100).toFixed(2)}%
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {!loading && <p className="text-xs text-center mt-4 m-0" style={{color:'#bbb'}}>🕐 {lastUpdated} · Auto-refreshes every 30s</p>}
+    </div>
+  );
+};
+
+const PriceMatchTeaser = ({ navigate }) => (
+  <div className="rounded-3xl p-7 cursor-pointer"
+    onClick={() => navigate('/pricematch')}
+    style={{background:'linear-gradient(135deg, #0f4c81 0%, #1a7a6e 100%)', boxShadow:'0 8px 32px rgba(15,76,129,0.25)'}}>
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="font-extrabold text-xl m-0 text-white">⚡ Price Match</h3>
+        <p className="text-sm mt-2 m-0" style={{color:'rgba(255,255,255,0.75)'}}>Found a better rate somewhere else?</p>
+        <p className="text-sm m-0" style={{color:'rgba(255,255,255,0.75)'}}>Show us — we'll beat it, guaranteed.</p>
+      </div>
+      <div className="rounded-2xl px-5 py-3 flex-shrink-0 ml-4"
+        style={{background:'rgba(255,255,255,0.15)', border:'1px solid rgba(255,255,255,0.3)'}}>
+        <p className="font-bold text-base m-0 text-white">Beat My Rate →</p>
+      </div>
+    </div>
+  </div>
+);
+
+// ══════════════════════════════════════════════════════════════
+// DESKTOP DASHBOARD — exact original structure, full width, PriceMatchTeaser instead of PriceMatch
+// ══════════════════════════════════════════════════════════════
+const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile, referral }) => (
   <div className="min-h-screen" style={{background:'#f7f8fc'}}>
 
-    {/* Header */}
+    {/* Header — full width, no max-w-6xl */}
     <div className="relative overflow-visible" style={{background:'linear-gradient(135deg, #0f4c81 0%, #1a7a6e 100%)'}}>
       <div className="absolute inset-0 opacity-10"
         style={{backgroundImage:`radial-gradient(circle at 20% 50%, white 1px, transparent 1px)`, backgroundSize:'60px 60px'}}/>
-      <div className="max-w-6xl mx-auto px-8 py-6">
+      <div className="px-8 py-6">
         <div className="flex justify-between items-center">
           <div>
             <p className="text-2xl font-extrabold text-white m-0" style={{letterSpacing:'-0.5px'}}>🌍 Draviṇa</p>
             <p className="text-xs mt-1 m-0" style={{color:'rgba(255,255,255,0.7)'}}>Welcome back 👋</p>
-            <h1 className="text-xl font-bold text-white mt-0.5 m-0">{user?.name || 'Loading...'}</h1>
+            <h1 className="text-xl font-bold text-white mt-0.5 m-0">{user?.fullName || user?.name || 'Loading...'}</h1>
           </div>
-          <div className="relative">
+          <div className="relative z-[9999]">
             <button onClick={() => setShowProfile(!showProfile)}
               className="flex items-center gap-2 rounded-full px-4 py-2 border-none cursor-pointer hover:bg-white/25 transition-all"
               style={{background:'rgba(255,255,255,0.15)', border:'2px solid rgba(255,255,255,0.3)', backdropFilter:'blur(10px)'}}>
@@ -529,7 +640,7 @@ const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, 
                     <FaUserCircle size={32} color="white"/>
                   </div>
                   <div>
-                    <p className="font-bold text-base m-0" style={{color:'#1a1a2e'}}>{user?.name || '...'}</p>
+                    <p className="font-bold text-base m-0" style={{color:'#1a1a2e'}}>{user?.fullName || user?.name || '...'}</p>
                     <p className="text-sm m-0" style={{color:'#888'}}>{user?.email || '...'}</p>
                   </div>
                 </div>
@@ -555,7 +666,7 @@ const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, 
                     <CircleProgress percentage={limits.weekly.percentage} color="#1a7a6e"/>
                   </div>
                 </div>
-                <button onClick={() => navigate('/accounts')}
+                <button onClick={() => { setShowProfile(false); navigate('/accounts'); }}
                   className="w-full py-2.5 rounded-xl font-bold text-sm border-none cursor-pointer mb-2 bg-teal-500/10 text-teal-400">
                   🏦 Manage Bank Accounts
                 </button>
@@ -571,8 +682,8 @@ const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, 
       </div>
     </div>
 
-    {/* Main */}
-    <div className="max-w-6xl mx-auto px-8 py-8">
+    {/* Main — full width, no max-w-6xl */}
+    <div className="px-8 py-8">
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-1 flex flex-col gap-5">
           {/* Balance */}
@@ -598,6 +709,7 @@ const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, 
               <CircleProgress percentage={limits.weekly.percentage} color="#1a7a6e"/>
             </div>
           </div>
+          <ReferralBanner referral={referral} />
           {/* Actions */}
           <div className="grid grid-cols-2 gap-3">
             <button onClick={() => navigate('/send')} className="py-4 rounded-2xl text-white font-bold text-sm border-none cursor-pointer hover:-translate-y-0.5 transition-all" style={{background:'linear-gradient(135deg, #0f4c81, #1a7a6e)', fontFamily:"'Sora', sans-serif"}}>💸 Send Money</button>
@@ -613,45 +725,23 @@ const DesktopDashboard = ({ user, balance, limits, rates, loading, lastUpdated, 
           </div>
         </div>
 
-        {/* Live Rates */}
-        <div className="col-span-2">
-          <div className="bg-white rounded-3xl p-7 h-full" style={{boxShadow:'0 4px 20px rgba(0,0,0,0.06)'}}>
-            <div className="flex justify-between items-center mb-6">
-              <div><h3 className="font-extrabold text-xl m-0" style={{color:'#1a1a2e'}}>Live Exchange Rates</h3><p className="text-sm mt-1 m-0" style={{color:'#888'}}>1 USD equals</p></div>
-              <div className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{background:'#f0fff8'}}>
-                <span className="w-2 h-2 rounded-full" style={{background:'#1a7a6e'}}/>
-                <span className="text-xs font-semibold" style={{color:'#1a7a6e'}}>Live</span>
-              </div>
-            </div>
-            {loading ? <div className="flex items-center justify-center h-64"><p style={{color:'#aaa'}}>Fetching rates...</p></div> : (
-              <div className="grid grid-cols-2 gap-4">
-                {currencies.map((c, i) => (
-                  <div key={c.code} className="flex justify-between items-center rounded-2xl p-5 transition-all hover:-translate-y-0.5 cursor-default"
-                    style={{background: i % 2 === 0 ? '#f7f8fc' : 'white', border:'1.5px solid #f0f0f0'}}
-                    onMouseOver={e => { e.currentTarget.style.borderColor='#0f4c81'; e.currentTarget.style.boxShadow='0 8px 20px rgba(15,76,129,0.1)'; }}
-                    onMouseOut={e => { e.currentTarget.style.borderColor='#f0f0f0'; e.currentTarget.style.boxShadow='none'; }}>
-                    <div className="flex items-center gap-3"><span className="text-3xl">{c.flag}</span><div><p className="font-bold text-sm m-0" style={{color:'#1a1a2e'}}>{c.code}</p><p className="text-xs m-0" style={{color:'#aaa'}}>{c.name}</p></div></div>
-                    <div className="text-right"><p className="font-extrabold text-lg m-0" style={{color:'#0f4c81'}}>{rates[c.code]?.toFixed(4) || 'N/A'}</p><p className="text-xs font-medium m-0" style={{color:'#1a7a6e'}}>↑ Live</p></div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {!loading && <p className="text-xs text-center mt-5 m-0" style={{color:'#bbb'}}>🕐 {lastUpdated} · Auto-refreshes every 30s</p>}
-          </div>
+        <div className="col-span-2 flex flex-col gap-6">
+          <PricePulse rates={rates} currencies={currencies} lastUpdated={lastUpdated} loading={loading} />
+          <PriceMatchTeaser navigate={navigate} />
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer — stays inside px-8 py-8 wrapper, not full bleed */}
       <div className="mt-6 bg-white rounded-3xl px-8 py-6 flex flex-wrap justify-between items-center gap-4" style={{boxShadow:'0 4px 20px rgba(0,0,0,0.06)'}}>
         <div><p className="font-bold text-base m-0" style={{color:'#1a1a2e'}}>🌍 Draviṇa</p><p className="text-sm mt-1 m-0" style={{color:'#888'}}>Send money globally, effortlessly.</p></div>
         <div className="text-center"><p className="text-sm m-0" style={{color:'#888'}}>Write to us</p><p className="font-semibold text-sm m-0" style={{color:'#0f4c81'}}>support@crobo.com</p></div>
         <div className="text-center">
-        <p className="text-sm m-0 text-gray-400">Help Center</p>
-        <p onClick={() => navigate('/faq')}
-          className="font-semibold text-sm m-0 cursor-pointer hover:underline text-blue-700">
-          ❓ FAQ →
-        </p>
-      </div>
+          <p className="text-sm m-0 text-gray-400">Help Center</p>
+          <p onClick={() => navigate('/faq')}
+            className="font-semibold text-sm m-0 cursor-pointer hover:underline text-blue-700">
+            ❓ FAQ →
+          </p>
+        </div>
         <div className="flex items-center gap-5">
           <FaLinkedin size={24} style={{color:'#0077b5', cursor:'pointer'}} onClick={() => window.open('#', '_blank')}/>
           <FaTwitter size={24} style={{color:'#1da1f2', cursor:'pointer'}} onClick={() => window.open('#', '_blank')}/>
@@ -679,13 +769,14 @@ function Dashboard() {
     daily: { used: 0, limit: 5000, percentage: 0 },
     weekly: { used: 0, limit: 20000, percentage: 0 }
   });
+  const [referral, setReferral] = useState({ referralCode: '', totalEarned: 0, totalReferrals: 0, bonusPerReferral: 25 });
 
   const fetchRates = async () => {
-    try {
-      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=GBP,EUR,INR,AUD,CAD,SGD,AED', { signal: AbortSignal.timeout(5000) });
-      if (!r.ok) throw new Error();
-      const d = await r.json(); setRates(d.rates); setLastUpdated(new Date().toLocaleTimeString()); setLoading(false); return;
-    } catch {}
+    // try {
+    //   const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=GBP,EUR,INR,AUD,CAD,SGD,AED', { signal: AbortSignal.timeout(5000) });
+    //   if (!r.ok) throw new Error();
+    //   const d = await r.json(); setRates(d.rates); setLastUpdated(new Date().toLocaleTimeString()); setLoading(false); return;
+    // } catch {}
     try {
       const r = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(5000) });
       if (!r.ok) throw new Error();
@@ -713,8 +804,22 @@ function Dashboard() {
     {code:'AED',name:'UAE Dirham',flag:'🇦🇪'},
   ];
 
-  const sharedProps = { user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile };
+  useEffect(() => {
+    const fetchReferral = async () => {
+      try {
+        const r = await getReferralStats();
+        if (!r.data.referralCode) {
+          const gen = await generateReferralCode();
+          setReferral({ ...r.data, referralCode: gen.data.referralCode });
+        } else {
+          setReferral(r.data);
+        }
+      } catch {}
+    };
+    fetchReferral();
+  }, []);
 
+  const sharedProps = { user, balance, limits, rates, loading, lastUpdated, currencies, navigate, setShowAddMoney, setShowAddRecipient, showProfile, setShowProfile, referral };
   const MobileThemes = { 1: MobileTheme1, 2: MobileTheme2, 3: MobileTheme3 };
   const ActiveMobileTheme = MobileThemes[MOBILE_THEME];
 

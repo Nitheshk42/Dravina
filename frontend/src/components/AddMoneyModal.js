@@ -37,8 +37,10 @@ function CheckoutForm({ amount, onSuccess, onClose }) {
       }
 
       // 3. Tell our backend payment succeeded
+      // ✅ Fix — send amount too
       await confirmPayment({ 
-        paymentIntentId: result.paymentIntent.id 
+        paymentIntentId: result.paymentIntent.id,
+        amount: parseFloat(amount)
       });
 
       onSuccess(parseFloat(amount));
