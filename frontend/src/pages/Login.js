@@ -4,6 +4,7 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { loginUser, googleAuth, setAccessToken, getRates } from '../services/api';
 import { useLocation } from 'react-router-dom';
 import { detectUserCurrency } from '../utils/detectLocation';
+import ChatWidget from '../components/ChatWidget';
 
 
 // ─── ANIMATIONS ──────────────────────────────────────────────
@@ -165,7 +166,8 @@ const handleLogin = async () => {
     setSwapped(!swapped);
   };
 
-  return (
+  return (         
+    <>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <div className="min-h-screen relative" style={{fontFamily:"'Sora', sans-serif"}}>
         <WorldMapBackground />
@@ -354,9 +356,9 @@ const handleLogin = async () => {
                     Fee Comparison
                   </p>
                   {[
-                    {name:'🌍 Draviṇa', fee:'$0.99', color:'#4ecdc4', best:true},
-                    {name:'🏦 Banks', fee:'$25+', color:'rgba(255,255,255,0.3)', best:false},
-                    {name:'💸 Western Union', fee:'$15+', color:'rgba(255,255,255,0.3)', best:false},
+                   // {name:'🌍 Draviṇa', fee:'$0.99', color:'#4ecdc4', best:true},
+                   // {name:'🏦 Banks', fee:'$25+', color:'rgba(255,255,255,0.3)', best:false},
+                   // {name:'💸 Western Union', fee:'$15+', color:'rgba(255,255,255,0.3)', best:false},
                   ].map(item => (
                     <div key={item.name} className="flex justify-between items-center mb-2.5">
                       <span className="text-sm" style={{color:'rgba(255,255,255,0.5)'}}>{item.name}</span>
@@ -474,8 +476,10 @@ const handleLogin = async () => {
             )}
           </div>
         </div>
-     </div>
+     </div>                                                                                                                                                                                                   
     </GoogleOAuthProvider>
+    <ChatWidget />
+    </>
   );
 }
 

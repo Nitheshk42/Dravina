@@ -10,6 +10,7 @@ import Recipients from './pages/Recipients';
 import FQQ from './pages/FAQ';
 import PriceMatch from './pages/PriceMatch';
 import MyAccounts from './pages/MyAccounts';
+import ChatWidget from './components/ChatWidget';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/faq" element={<FQQ />} />
         <Route path="/accounts" element={<ProtectedRoute><MyAccounts /></ProtectedRoute>} />
         <Route path="/pricematch" element={<ProtectedRoute><PriceMatch /></ProtectedRoute>} />
+        <Route path="/ChatWidget" element={<ChatWidget />} /> 
       </Routes>
     </HashRouter>
   );
