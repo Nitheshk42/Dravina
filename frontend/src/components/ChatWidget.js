@@ -35,7 +35,7 @@ const ChatWidget = () => {
       content: `⏳ You're in the queue! Position: #${queuePosition}. An agent will be with you shortly.`
     }]);
 
-    const socket = new SockJS('http://localhost:8080/ws');
+   const socket = new SockJS(`${API.defaults.baseURL.replace('/api', '')}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
