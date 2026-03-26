@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { addRecipient,updateRecipient } from '../services/api';
+import { addRecipient, updateRecipient } from '../services/api';
+import { validateRecipient } from '../utils/validation';
 
 const countries = [
   'United Kingdom', 'Europe', 'India', 'Australia',
@@ -21,27 +22,56 @@ function AddRecipientModal({ onClose, onSuccess, editRecipient = null }) {
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
+    setError('');
+  };
+
+  const getBankCodeLabel = () => {
+    switch (form.country) {
+      case 'India': return 'IFSC Code';
+      case 'United Kingdom': return 'Sort Code';
+      case 'Europe': return 'IBAN';
+      case 'Australia': return 'BSB Code';
+      case 'Canada': return 'Transit Number';
+      case 'Singapore': return 'Bank Code';
+      case 'UAE': return 'IBAN';
+      default: return 'IFSC / Bank Code';
+    }
+  };
+
+  const getBankCodePlaceholder = () => {
+    switch (form.country) {
+      case 'India': return 'e.g. HDFC0001234';
+      case 'United Kingdom': return 'e.g. 20-00-00';
+      case 'Europe': return 'e.g. DE89370400440532013000';
+      case 'Australia': return 'e.g. 062-000';
+      case 'Canada': return 'e.g. 12345';
+      case 'Singapore': return 'e.g. 7171';
+      case 'UAE': return 'e.g. AE070331234567890123456';
+      default: return 'Bank code';
+    }
   };
 
   const handleSubmit = async () => {
     setError('');
 
-    if (!form.fullName || !form.email || !form.phone || !form.country || !form.bankAccount || !form.ifscCode) {
-      setError('Please fill in all fields!');
+    // Frontend validation
+    const validationError = validateRecipient(form);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setLoading(true);
     try {
       let response;
-     if (editRecipient) {
-     response = await updateRecipient(editRecipient.id, form);
-       } else {
+      if (editRecipient) {
+        response = await updateRecipient(editRecipient.id, form);
+      } else {
         response = await addRecipient(form);
       }
       onSuccess(response.data.recipient, !!editRecipient);
     } catch (err) {
-      setError('Something went wrong. Please try again!');
+      setError(err.response?.data?.message || 'Something went wrong. Please try again!');
       setLoading(false);
     }
   };
@@ -191,12 +221,12 @@ function AddRecipientModal({ onClose, onSuccess, editRecipient = null }) {
           />
         </div>
 
-        {/* IFSC Code */}
+        {/* Bank Code (dynamic label) */}
         <div style={{ marginBottom: '20px' }}>
-          <label style={labelStyle}>IFSC Code</label>
+          <label style={labelStyle}>{getBankCodeLabel()}</label>
           <input
             type="text"
-            placeholder="HDFC0001234"
+            placeholder={getBankCodePlaceholder()}
             value={form.ifscCode}
             onChange={(e) => handleChange('ifscCode', e.target.value)}
             style={{ ...inputStyle, textTransform: 'uppercase' }}
@@ -209,7 +239,7 @@ function AddRecipientModal({ onClose, onSuccess, editRecipient = null }) {
             background: '#fff0f0', borderRadius: '12px',
             padding: '12px', marginBottom: '16px'
           }}>
-            <p style={{ color: '#e74c3c', fontSize: '13px', margin: 0 }}>❌ {error}</p>
+            <p style={{ color: '#e74c3c', fontSize: '13px', margin: 0 }}>⚠️ {error}</p>
           </div>
         )}
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { addAccount } from '../services/api';
+import { validateAccount } from '../utils/validation';
 
 // ─── COUNTRY FIELDS CONFIG ────────────────────────────────────
 const countryConfigs = {
@@ -82,27 +83,25 @@ function AddAccountModal({ onClose, onSuccess }) {
   };
 
   const handleSubmit = async () => {
-  try {
-    setError('');
-    if (!formData.holder_name || !formData.bank_name || !formData.account_type) {
-      setError('Please fill in all required fields!'); return;
-    }
-    if (config) {
-      for (const field of config.fields) {
-        if (!formData[field.key]) {
-          setError(`Please fill in ${field.label}!`); return;
-        }
+    try {
+      setError('');
+
+      // Frontend validation
+      const validationError = validateAccount(formData, selectedCountry, config);
+      if (validationError) {
+        setError(validationError);
+        return;
       }
+
+      setLoading(true);
+      const response = await addAccount({ ...formData, country: selectedCountry });
+      onSuccess(response.data.account);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong!');
+    } finally {
+      setLoading(false);
     }
-    setLoading(true);
-    const response = await addAccount({ ...formData, country: selectedCountry });
-    onSuccess(response.data.account);
-  } catch (err) {
-    setError(err.response?.data?.message || 'Something went wrong!');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
@@ -153,7 +152,7 @@ function AddAccountModal({ onClose, onSuccess }) {
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(countryConfigs).map(([code, cfg]) => (
               <button key={code}
-                onClick={() => { setSelectedCountry(code); setStep(2); setFormData({}); }}
+                onClick={() => { setSelectedCountry(code); setStep(2); setFormData({}); setError(''); }}
                 className="flex items-center gap-3 rounded-2xl p-4 cursor-pointer border-none text-left transition-all"
                 style={{
                   background: 'rgba(255,255,255,0.05)',
@@ -172,7 +171,7 @@ function AddAccountModal({ onClose, onSuccess }) {
           <div className="flex flex-col gap-4">
 
             {/* Back */}
-            <button onClick={() => setStep(1)}
+            <button onClick={() => { setStep(1); setError(''); }}
               className="flex items-center gap-2 text-xs font-semibold border-none bg-transparent cursor-pointer mb-2 w-fit"
               style={{ color: 'rgba(255,255,255,0.4)' }}>
               ← Back to countries
